@@ -27,7 +27,7 @@ export interface GemmaRecommendationRequest {
   targetGender: 'M' | 'F' | 'any';
   preferences?: {
     popularityLevel?: 'rare' | 'uncommon' | 'moderate' | 'popular' | 'any';
-    stylePreference?: 'similar' | 'complementary' | 'any';
+    maxLetters?: number;
     meaningImportance?: 'low' | 'medium' | 'high';
   };
 }
@@ -49,7 +49,7 @@ export async function generateGemmaNameSuggestions(
       messages: [
         {
           role: 'system',
-          content: `You are a French baby name expert specializing in name recommendations. You have deep knowledge of French naming traditions, phonetics, and cultural significance. Always respond with valid JSON format.`,
+          content: `Vous êtes un expert en prénoms français spécialisé dans les recommandations de noms. Vous avez une connaissance approfondie des traditions de nommage françaises, de la phonétique et de la signification culturelle. Répondez toujours au format JSON valide.`,
         },
         {
           role: 'user',
@@ -88,47 +88,48 @@ function buildGemmaPrompt(request: GemmaRecommendationRequest): string {
 
   const genderText =
     targetGender === 'any'
-      ? 'any gender'
+      ? 'tous genres'
       : targetGender === 'M'
-        ? 'boy'
-        : 'girl';
+        ? 'garçon'
+        : 'fille';
   const siblingText =
     existingChildren.length > 0
-      ? `existing children: ${existingChildren.map((child) => `${child.name} (${child.gender})`).join(', ')}`
-      : 'no existing children';
+      ? `enfants existants : ${existingChildren.map((child) => `${child.name} (${child.gender === 'M' ? 'garçon' : 'fille'})`).join(', ')}`
+      : 'aucun enfant existant';
 
   const popularityText =
     preferences?.popularityLevel && preferences.popularityLevel !== 'any'
-      ? `Popularity preference: ${preferences.popularityLevel}`
+      ? `Préférence de popularité : ${preferences.popularityLevel === 'rare' ? 'rare' : preferences.popularityLevel === 'uncommon' ? 'peu commun' : preferences.popularityLevel === 'moderate' ? 'modérément populaire' : 'très populaire'}`
       : '';
 
-  const styleText =
-    preferences?.stylePreference && preferences.stylePreference !== 'any'
-      ? `Style preference: ${preferences.stylePreference} to existing names`
-      : '';
+  const maxLettersText = preferences?.maxLetters
+    ? `Nombre maximum de lettres : ${preferences.maxLetters}`
+    : '';
 
-  return `Please suggest 5 French baby names for a ${genderText} with the last name "${lastName}".
+  return `Veuillez suggérer 5 prénoms français pour un(e) ${genderText} avec le nom de famille "${lastName}".
 
-Family context:
-- Last name: ${lastName}
+Contexte familial :
+- Nom de famille : ${lastName}
 - ${siblingText}
-- Target gender: ${genderText}
+- Genre cible : ${genderText}
 ${popularityText ? `- ${popularityText}` : ''}
-${styleText ? `- ${styleText}` : ''}
+${maxLettersText ? `- ${maxLettersText}` : ''}
 
-Consider:
-1. Phonetic harmony with the last name "${lastName}"
-2. Sibling name compatibility (avoid similar sounds, maintain family style)
-3. French cultural appropriateness and pronunciation
-4. Modern French naming trends
-5. Avoid names that are too similar to existing siblings
+Considérez :
+1. L'harmonie phonétique avec le nom de famille "${lastName}"
+2. La compatibilité avec les frères et sœurs (éviter les sons similaires, maintenir le style familial)
+3. L'adéquation culturelle française et la prononciation
+4. Les tendances modernes de nommage français
+5. Éviter les noms trop similaires aux frères et sœurs existants
+${maxLettersText ? `6. Les noms ne doivent pas dépasser ${preferences?.maxLetters} lettres` : ''}
+${popularityText ? `7. Privilégier les noms ${preferences?.popularityLevel === 'rare' ? 'rares et uniques' : preferences?.popularityLevel === 'uncommon' ? 'peu communs' : preferences?.popularityLevel === 'moderate' ? 'modérément populaires' : 'très populaires'}` : ''}
 
-Respond with JSON in this exact format:
+Répondez avec JSON dans ce format exact :
 {
   "suggestions": [
     {
-      "name": "suggested name",
-      "reasoning": "detailed explanation of why this name fits",
+      "name": "nom suggéré",
+      "reasoning": "explication détaillée de pourquoi ce nom convient",
       "confidence": 0.85,
       "compatibility": {
         "lastName": 0.9,
@@ -139,7 +140,7 @@ Respond with JSON in this exact format:
   ]
 }
 
-Confidence and compatibility scores should be between 0.0 and 1.0.`;
+Les scores de confiance et de compatibilité doivent être entre 0.0 et 1.0.`;
 }
 
 // Extract JSON from markdown code blocks
@@ -239,7 +240,7 @@ export async function testGemmaConnection(): Promise<boolean> {
       messages: [
         {
           role: 'user',
-          content: 'Say "Hello" in one word only.',
+          content: 'Dites "Bonjour" en un seul mot.',
         },
       ],
       max_tokens: 5,
@@ -309,7 +310,7 @@ export async function debugGemmaConnection(): Promise<void> {
           messages: [
             {
               role: 'user',
-              content: 'Say hello',
+              content: 'Dites bonjour',
             },
           ],
           max_tokens: 10,

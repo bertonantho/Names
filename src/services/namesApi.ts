@@ -155,7 +155,7 @@ export interface FamilyContext {
   preferences: {
     gender: 'M' | 'F' | 'any';
     popularityLevel: 'rare' | 'uncommon' | 'moderate' | 'popular' | 'any';
-    stylePreference: 'similar' | 'complementary' | 'any';
+    maxLetters: number;
     meaningImportance: 'low' | 'medium' | 'high';
   };
 }
@@ -343,6 +343,13 @@ export async function generateAIRecommendations(
     (name) => !existingNames.includes(name.name.toLowerCase())
   );
 
+  // Filter by max letters if specified
+  if (context.preferences.maxLetters) {
+    candidates = candidates.filter(
+      (name) => countLetters(name.name) <= context.preferences.maxLetters
+    );
+  }
+
   // Calculate scores for each candidate
   const scoredCandidates = candidates.map((name) => {
     let totalScore = 0;
@@ -358,7 +365,7 @@ export async function generateAIRecommendations(
     const siblingScore = calculateSiblingCompatibility(
       name.name,
       context.existingChildren,
-      context.preferences.stylePreference
+      'any' // Default to any style since we removed style preference
     );
     totalScore += siblingScore * 0.3;
 
@@ -408,7 +415,7 @@ export async function generateGemmaEnhancedRecommendations(
       targetGender: context.preferences.gender,
       preferences: {
         popularityLevel: context.preferences.popularityLevel,
-        stylePreference: context.preferences.stylePreference,
+        maxLetters: context.preferences.maxLetters,
         meaningImportance: context.preferences.meaningImportance,
       },
     };
@@ -954,4 +961,85 @@ function getMockData(): ProcessedNamesData {
     },
     names: mockNames,
   };
+}
+
+export async function getDepartmentData(
+  name: string,
+  sex: 'M' | 'F',
+  year: number
+): Promise<Record<string, number>> {
+  try {
+    // In a real implementation, this would query the CSV file or a database
+    // For now, we'll simulate fetching department data from the CSV
+
+    // This is a placeholder - in a real app, you'd want to:
+    // 1. Parse the CSV file server-side
+    // 2. Create an API endpoint to fetch department data
+    // 3. Or pre-process department data into a separate JSON file
+
+    // For demonstration, let's create a mock implementation that simulates
+    // realistic department distribution based on the name's popularity
+    const nameData = await getNameDetails(name, sex);
+    if (!nameData) return {};
+
+    const yearlyBirths = nameData.yearlyData[year.toString()] || 0;
+    if (yearlyBirths === 0) return {};
+
+    // Simulate department distribution based on real population patterns
+    const departments: Record<string, number> = {};
+
+    // French department codes (01-95 for metropolitan France)
+    const metroDepCodes = Array.from({ length: 95 }, (_, i) =>
+      (i + 1).toString().padStart(2, '0')
+    );
+
+    // Population weights for different department types
+    const populationWeights: Record<string, number> = {
+      // Île-de-France (Paris region) - highest population
+      '75': 3.0,
+      '92': 2.5,
+      '93': 2.2,
+      '94': 2.0,
+      '95': 1.8,
+      '77': 1.5,
+      '78': 1.6,
+      '91': 1.4,
+
+      // Major cities
+      '13': 2.0, // Marseille
+      '69': 1.8, // Lyon
+      '59': 1.6, // Lille
+      '33': 1.4, // Bordeaux
+      '44': 1.2, // Nantes
+      '67': 1.1, // Strasbourg
+      '31': 1.3, // Toulouse
+      '06': 1.2, // Nice
+      '34': 1.1, // Montpellier
+      '35': 1.0, // Rennes
+
+      // Other departments get base weight
+    };
+
+    let totalWeight = 0;
+    metroDepCodes.forEach((code) => {
+      const weight = populationWeights[code] || 0.3 + Math.random() * 0.7;
+      totalWeight += weight;
+    });
+
+    // Distribute births across departments
+    metroDepCodes.forEach((code) => {
+      const weight = populationWeights[code] || 0.3 + Math.random() * 0.7;
+      const proportion = weight / totalWeight;
+      const deptBirths = Math.floor(yearlyBirths * proportion);
+
+      if (deptBirths > 0) {
+        departments[code] = deptBirths;
+      }
+    });
+
+    return departments;
+  } catch (error) {
+    console.error('Error fetching department data:', error);
+    return {};
+  }
 }

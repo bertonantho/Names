@@ -29,7 +29,7 @@ interface FamilyMember {
 interface RecommendationPreferences {
   gender: 'M' | 'F' | 'any';
   popularityLevel: 'rare' | 'uncommon' | 'moderate' | 'popular' | 'any';
-  stylePreference: 'similar' | 'complementary' | 'any';
+  maxLetters: number;
   meaningImportance: 'low' | 'medium' | 'high';
 }
 
@@ -39,7 +39,7 @@ export const AIRecommendationsPage: React.FC = () => {
   const [preferences, setPreferences] = useState<RecommendationPreferences>({
     gender: 'any',
     popularityLevel: 'any',
-    stylePreference: 'similar',
+    maxLetters: 8,
     meaningImportance: 'medium',
   });
   const [recommendations, setRecommendations] = useState<
@@ -310,27 +310,27 @@ export const AIRecommendationsPage: React.FC = () => {
                 </select>
               </div>
 
-              {/* Style Preference */}
+              {/* Max Letters */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Style Preference
+                  Nombre maximum de lettres
                 </label>
-                <select
-                  value={preferences.stylePreference}
+                <input
+                  type="number"
+                  min="2"
+                  max="15"
+                  value={preferences.maxLetters}
                   onChange={(e) =>
                     setPreferences({
                       ...preferences,
-                      stylePreference: e.target.value as any,
+                      maxLetters: parseInt(e.target.value) || 8,
                     })
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value="similar">Similar to siblings</option>
-                  <option value="complementary">
-                    Complementary to siblings
-                  </option>
-                  <option value="any">Any style</option>
-                </select>
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Limite la longueur des noms suggérés
+                </p>
               </div>
 
               {/* Meaning Importance */}

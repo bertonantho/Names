@@ -14,6 +14,7 @@ import {
   findNamesWithSimilarCharacteristics,
 } from '../services/namesApi';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import FranceMap from '../components/FranceMap';
 
 // Simple line chart component
 const TrendChart: React.FC<{ data: NameData; color: string }> = ({
@@ -177,6 +178,7 @@ export const NameDetailsPage: React.FC = () => {
     NameData[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [selectedYear, setSelectedYear] = useState(2024);
 
   useEffect(() => {
     const loadNameData = async () => {
@@ -373,6 +375,15 @@ export const NameDetailsPage: React.FC = () => {
               <TrendChart
                 data={data}
                 color={data.sex === 'M' ? '#2563eb' : '#dc2626'}
+              />
+            </div>
+
+            {/* France Map */}
+            <div className="mb-8">
+              <FranceMap
+                nameData={data}
+                selectedYear={selectedYear}
+                onYearChange={setSelectedYear}
               />
             </div>
 
