@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 99 102 241;
+    --color-primary-50: 238 242 255;
+    --color-primary-100: 224 231 255;
+    --color-primary-200: 199 210 254;
+    --color-primary-300: 165 180 252;
+    --color-primary-400: 129 140 248;
+    --color-primary-500: 99 102 241;
+    --color-primary-600: 79 70 229;
+    --color-primary-700: 67 56 202;
+    --color-primary-800: 55 48 163;
+    --color-primary-900: 49 46 129;
+  }
+}
+
+@layer utilities {
+  .text-primary {
+    color: rgb(var(--color-primary));
+  }
+  .text-primary-600 {
+    color: rgb(var(--color-primary-600));
+  }
+  .bg-primary {
+    background-color: rgb(var(--color-primary));
+  }
+  .bg-primary-50 {
+    background-color: rgb(var(--color-primary-50));
+  }
+  .bg-primary-600 {
+    background-color: rgb(var(--color-primary-600));
+  }
+  .border-primary {
+    border-color: rgb(var(--color-primary));
+  }
+  .border-t-primary {
+    border-top-color: rgb(var(--color-primary));
+  }
+  .focus\:ring-primary:focus {
+    --tw-ring-color: rgb(var(--color-primary));
+  }
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
