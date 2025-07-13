@@ -1,3 +1,9 @@
+import {
+  generateGemmaNameSuggestions,
+  GemmaNameSuggestion,
+  GemmaRecommendationRequest,
+} from './gemmaService';
+
 // Types for the French names data
 export interface NameData {
   name: string;
@@ -35,6 +41,530 @@ export function countSyllables(name: string): number {
 
   // Ensure minimum of 1 syllable
   return Math.max(1, Math.round(syllableCount));
+}
+
+// Calculate similarity score between two names
+export function calculateNameSimilarity(name1: string, name2: string): number {
+  const n1 = name1.toLowerCase();
+  const n2 = name2.toLowerCase();
+
+  if (n1 === n2) return 1.0;
+
+  // Calculate various similarity metrics
+  let score = 0;
+
+  // 1. Length similarity (20% weight)
+  const lengthSimilarity =
+    1 - Math.abs(n1.length - n2.length) / Math.max(n1.length, n2.length);
+  score += lengthSimilarity * 0.2;
+
+  // 2. Starting letters similarity (30% weight)
+  const startSimilarity = n1.charAt(0) === n2.charAt(0) ? 1 : 0;
+  score += startSimilarity * 0.3;
+
+  // 3. Ending similarity (25% weight)
+  const endLength = Math.min(3, Math.min(n1.length, n2.length));
+  const end1 = n1.slice(-endLength);
+  const end2 = n2.slice(-endLength);
+  const endSimilarity =
+    end1 === end2 ? 1 : end1.slice(-2) === end2.slice(-2) ? 0.5 : 0;
+  score += endSimilarity * 0.25;
+
+  // 4. Common letters similarity (25% weight)
+  const letters1 = new Set(n1.split(''));
+  const letters2 = new Set(n2.split(''));
+  const commonLetters = new Set([...letters1].filter((x) => letters2.has(x)));
+  const letterSimilarity =
+    commonLetters.size / Math.max(letters1.size, letters2.size);
+  score += letterSimilarity * 0.25;
+
+  return score;
+}
+
+// Find similar names based on phonetic and structural similarity
+export async function findSimilarNames(
+  targetName: string,
+  targetSex: 'M' | 'F',
+  limit: number = 8
+): Promise<NameData[]> {
+  const data = await loadProcessedData();
+
+  // Filter names of the same gender
+  const sameGenderNames = data.names.filter(
+    (name) =>
+      name.sex === targetSex &&
+      name.name.toLowerCase() !== targetName.toLowerCase() &&
+      (name.yearlyData['2024'] || 0) > 0 // Only include names with recent usage
+  );
+
+  // Calculate similarity scores
+  const namesWithSimilarity = sameGenderNames.map((name) => ({
+    ...name,
+    similarity: calculateNameSimilarity(targetName, name.name),
+  }));
+
+  // Sort by similarity and popularity
+  namesWithSimilarity.sort((a, b) => {
+    // Primary sort: similarity score
+    const similarityDiff = b.similarity - a.similarity;
+    if (Math.abs(similarityDiff) > 0.1) return similarityDiff;
+
+    // Secondary sort: 2024 popularity for ties
+    const aCount2024 = a.yearlyData['2024'] || 0;
+    const bCount2024 = b.yearlyData['2024'] || 0;
+    return bCount2024 - aCount2024;
+  });
+
+  return namesWithSimilarity.slice(0, limit);
+}
+
+// Find names with similar characteristics (letters, syllables, trending)
+export async function findNamesWithSimilarCharacteristics(
+  targetName: string,
+  targetSex: 'M' | 'F',
+  limit: number = 8
+): Promise<NameData[]> {
+  const data = await loadProcessedData();
+  const targetLetters = countLetters(targetName);
+  const targetSyllables = countSyllables(targetName);
+
+  // Filter names of the same gender with similar characteristics
+  const candidateNames = data.names.filter(
+    (name) =>
+      name.sex === targetSex &&
+      name.name.toLowerCase() !== targetName.toLowerCase() &&
+      (name.yearlyData['2024'] || 0) > 0 && // Only include names with recent usage
+      Math.abs(countLetters(name.name) - targetLetters) <= 2 && // Similar length
+      Math.abs(countSyllables(name.name) - targetSyllables) <= 1 // Similar syllables
+  );
+
+  // Sort by 2024 popularity
+  candidateNames.sort((a, b) => {
+    const aCount2024 = a.yearlyData['2024'] || 0;
+    const bCount2024 = b.yearlyData['2024'] || 0;
+    return bCount2024 - aCount2024;
+  });
+
+  return candidateNames.slice(0, limit);
+}
+
+// AI-powered family name recommendations
+export interface FamilyContext {
+  lastName: string;
+  existingChildren: Array<{ name: string; gender: 'M' | 'F' }>;
+  preferences: {
+    gender: 'M' | 'F' | 'any';
+    popularityLevel: 'rare' | 'uncommon' | 'moderate' | 'popular' | 'any';
+    stylePreference: 'similar' | 'complementary' | 'any';
+    meaningImportance: 'low' | 'medium' | 'high';
+  };
+}
+
+export interface EnhancedRecommendation {
+  name: NameData;
+  aiScore: number;
+  gemmaInsights?: GemmaNameSuggestion;
+  isGemmaRecommended: boolean;
+}
+
+// Analyze family naming patterns
+function analyzeFamilyPatterns(
+  children: Array<{ name: string; gender: 'M' | 'F' }>
+) {
+  if (children.length === 0) return null;
+
+  const lengths = children.map((child) => countLetters(child.name));
+  const syllables = children.map((child) => countSyllables(child.name));
+
+  return {
+    averageLength: lengths.reduce((sum, len) => sum + len, 0) / lengths.length,
+    averageSyllables:
+      syllables.reduce((sum, syl) => sum + syl, 0) / syllables.length,
+    lengthRange: { min: Math.min(...lengths), max: Math.max(...lengths) },
+    syllableRange: { min: Math.min(...syllables), max: Math.max(...syllables) },
+    commonStartingLetters: children.map((child) =>
+      child.name.charAt(0).toLowerCase()
+    ),
+    commonEndings: children.map((child) => child.name.slice(-2).toLowerCase()),
+  };
+}
+
+// Calculate phonetic compatibility with last name
+function calculateLastNameCompatibility(
+  firstName: string,
+  lastName: string
+): number {
+  const first = firstName.toLowerCase();
+  const last = lastName.toLowerCase();
+
+  let score = 0;
+
+  // 1. Avoid alliteration unless it sounds good (30% weight)
+  const sameStart = first.charAt(0) === last.charAt(0);
+  if (sameStart) {
+    // Some alliterations work well, others don't
+    const goodAlliterations = ['b', 'c', 'd', 'j', 'l', 'm', 'r', 's'];
+    score += goodAlliterations.includes(first.charAt(0)) ? 0.3 : 0.1;
+  } else {
+    score += 0.25; // Slightly prefer non-alliterative
+  }
+
+  // 2. Flow and rhythm (40% weight)
+  const firstEndsVowel = /[aeiouy]$/i.test(first);
+  const lastStartsVowel = /^[aeiouy]/i.test(last);
+
+  // Avoid vowel-vowel collision
+  if (firstEndsVowel && lastStartsVowel) {
+    score += 0.1;
+  } else {
+    score += 0.4;
+  }
+
+  // 3. Length balance (30% weight)
+  const totalLength = first.length + last.length;
+  if (totalLength >= 8 && totalLength <= 16) {
+    score += 0.3;
+  } else if (totalLength >= 6 && totalLength <= 20) {
+    score += 0.2;
+  } else {
+    score += 0.1;
+  }
+
+  return Math.min(1, score);
+}
+
+// Calculate sibling compatibility score
+function calculateSiblingCompatibility(
+  targetName: string,
+  siblings: Array<{ name: string; gender: 'M' | 'F' }>,
+  stylePreference: 'similar' | 'complementary' | 'any'
+): number {
+  if (siblings.length === 0) return 0.5; // Neutral score
+
+  let totalScore = 0;
+
+  for (const sibling of siblings) {
+    let siblingScore = 0;
+
+    // Length compatibility
+    const lengthDiff = Math.abs(
+      countLetters(targetName) - countLetters(sibling.name)
+    );
+    if (stylePreference === 'similar') {
+      siblingScore += lengthDiff <= 2 ? 0.3 : 0.1;
+    } else if (stylePreference === 'complementary') {
+      siblingScore += lengthDiff >= 2 && lengthDiff <= 4 ? 0.3 : 0.1;
+    } else {
+      siblingScore += 0.2; // Neutral
+    }
+
+    // Syllable compatibility
+    const syllableDiff = Math.abs(
+      countSyllables(targetName) - countSyllables(sibling.name)
+    );
+    if (stylePreference === 'similar') {
+      siblingScore += syllableDiff <= 1 ? 0.3 : 0.1;
+    } else if (stylePreference === 'complementary') {
+      siblingScore += syllableDiff >= 1 && syllableDiff <= 2 ? 0.3 : 0.1;
+    } else {
+      siblingScore += 0.2; // Neutral
+    }
+
+    // Starting letter pattern
+    const sameStart =
+      targetName.charAt(0).toLowerCase() ===
+      sibling.name.charAt(0).toLowerCase();
+    if (stylePreference === 'similar') {
+      siblingScore += sameStart ? 0.2 : 0.1;
+    } else if (stylePreference === 'complementary') {
+      siblingScore += !sameStart ? 0.2 : 0.1;
+    } else {
+      siblingScore += 0.15; // Neutral
+    }
+
+    // Avoid too similar names
+    const similarity = calculateNameSimilarity(targetName, sibling.name);
+    if (similarity > 0.7) {
+      siblingScore *= 0.5; // Penalty for too similar
+    }
+
+    totalScore += siblingScore;
+  }
+
+  return totalScore / siblings.length;
+}
+
+// Get popularity score based on preference
+function getPopularityScore(name: NameData, preference: string): number {
+  const count2024 = name.yearlyData['2024'] || 0;
+
+  switch (preference) {
+    case 'rare':
+      return count2024 <= 50 ? 1 : count2024 <= 100 ? 0.7 : 0.3;
+    case 'uncommon':
+      return count2024 > 50 && count2024 <= 200
+        ? 1
+        : count2024 <= 300
+          ? 0.7
+          : 0.4;
+    case 'moderate':
+      return count2024 > 200 && count2024 <= 800
+        ? 1
+        : count2024 <= 1000
+          ? 0.8
+          : 0.5;
+    case 'popular':
+      return count2024 > 800 ? 1 : count2024 > 500 ? 0.8 : 0.4;
+    default:
+      return 0.5; // Neutral for 'any'
+  }
+}
+
+// Main AI recommendation function
+export async function generateAIRecommendations(
+  context: FamilyContext
+): Promise<NameData[]> {
+  const data = await loadProcessedData();
+
+  // Filter by gender preference
+  let candidates = data.names.filter((name) => {
+    if (context.preferences.gender === 'any') return true;
+    return name.sex === context.preferences.gender;
+  });
+
+  // Only include names with recent usage
+  candidates = candidates.filter((name) => (name.yearlyData['2024'] || 0) > 0);
+
+  // Exclude existing family names
+  const existingNames = context.existingChildren.map((child) =>
+    child.name.toLowerCase()
+  );
+  candidates = candidates.filter(
+    (name) => !existingNames.includes(name.name.toLowerCase())
+  );
+
+  // Calculate scores for each candidate
+  const scoredCandidates = candidates.map((name) => {
+    let totalScore = 0;
+
+    // 1. Last name compatibility (25% weight)
+    const lastNameScore = calculateLastNameCompatibility(
+      name.name,
+      context.lastName
+    );
+    totalScore += lastNameScore * 0.25;
+
+    // 2. Sibling compatibility (30% weight)
+    const siblingScore = calculateSiblingCompatibility(
+      name.name,
+      context.existingChildren,
+      context.preferences.stylePreference
+    );
+    totalScore += siblingScore * 0.3;
+
+    // 3. Popularity preference (25% weight)
+    const popularityScore = getPopularityScore(
+      name,
+      context.preferences.popularityLevel
+    );
+    totalScore += popularityScore * 0.25;
+
+    // 4. General appeal and trending (20% weight)
+    const count2024 = name.yearlyData['2024'] || 0;
+    const count2023 = name.yearlyData['2023'] || 0;
+    const trendScore =
+      count2023 > 0 ? Math.min(2, count2024 / count2023) / 2 : 0.5;
+    totalScore += trendScore * 0.2;
+
+    return {
+      ...name,
+      aiScore: totalScore,
+      lastNameCompatibility: lastNameScore,
+      siblingCompatibility: siblingScore,
+      popularityMatch: popularityScore,
+      trendScore: trendScore,
+    };
+  });
+
+  // Sort by AI score
+  scoredCandidates.sort((a, b) => b.aiScore - a.aiScore);
+
+  // Return top 12 recommendations
+  return scoredCandidates.slice(0, 12);
+}
+
+// Enhanced AI recommendations with Gemma 3 integration
+export async function generateGemmaEnhancedRecommendations(
+  context: FamilyContext
+): Promise<EnhancedRecommendation[]> {
+  try {
+    // Get traditional AI recommendations
+    const traditionalRecommendations = await generateAIRecommendations(context);
+
+    // Prepare Gemma request
+    const gemmaRequest: GemmaRecommendationRequest = {
+      lastName: context.lastName,
+      existingChildren: context.existingChildren,
+      targetGender: context.preferences.gender,
+      preferences: {
+        popularityLevel: context.preferences.popularityLevel,
+        stylePreference: context.preferences.stylePreference,
+        meaningImportance: context.preferences.meaningImportance,
+      },
+    };
+
+    // Get Gemma suggestions
+    const gemmaSuggestions = await generateGemmaNameSuggestions(gemmaRequest);
+    console.log('Gemma suggestions received:', gemmaSuggestions);
+
+    // Load processed data to find matching names
+    const data = await loadProcessedData();
+    console.log(`Loaded ${data.names.length} names from database`);
+    console.log(
+      'Sample names:',
+      data.names.slice(0, 10).map((n) => `${n.name} (${n.sex})`)
+    );
+
+    // Create a map of traditional recommendations
+    const traditionalMap = new Map<string, NameData>();
+    traditionalRecommendations.forEach((name) => {
+      traditionalMap.set(name.name.toLowerCase(), name);
+    });
+
+    // Create enhanced recommendations
+    const enhancedRecommendations: EnhancedRecommendation[] = [];
+
+    // Add Gemma-recommended names first
+    for (const gemmaSuggestion of gemmaSuggestions) {
+      console.log(`Looking for Gemma suggestion: "${gemmaSuggestion.name}"`);
+      // Try exact match first
+      let matchingName = data.names.find(
+        (name) =>
+          name.name.toLowerCase() === gemmaSuggestion.name.toLowerCase() &&
+          (context.preferences.gender === 'any' ||
+            name.sex === context.preferences.gender)
+      );
+
+      // If no exact match, try without accents
+      if (!matchingName) {
+        const normalizedSuggestion = gemmaSuggestion.name
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+
+        matchingName = data.names.find((name) => {
+          const normalizedName = name.name
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+          return (
+            normalizedName === normalizedSuggestion &&
+            (context.preferences.gender === 'any' ||
+              name.sex === context.preferences.gender)
+          );
+        });
+      }
+
+      if (matchingName) {
+        console.log(`Found matching name: "${matchingName.name}"`);
+        const traditionalMatch = traditionalMap.get(
+          matchingName.name.toLowerCase()
+        );
+
+        enhancedRecommendations.push({
+          name: matchingName,
+          aiScore: traditionalMatch
+            ? (traditionalMatch as any).aiScore
+            : gemmaSuggestion.compatibility.overall,
+          gemmaInsights: gemmaSuggestion,
+          isGemmaRecommended: true,
+        });
+
+        // Remove from traditional map to avoid duplicates
+        traditionalMap.delete(matchingName.name.toLowerCase());
+      } else {
+        console.log(`No matching name found for: "${gemmaSuggestion.name}"`);
+        // Check if the name exists but with different gender
+        const nameExists = data.names.find(
+          (name) =>
+            name.name.toLowerCase() === gemmaSuggestion.name.toLowerCase()
+        );
+        if (nameExists) {
+          console.log(
+            `Name exists but with different gender: "${nameExists.name}" (${nameExists.sex})`
+          );
+        }
+
+        // Create a mock entry for Gemma suggestions that don't exist in our database
+        const mockName: NameData = {
+          name: gemmaSuggestion.name,
+          sex:
+            context.preferences.gender === 'any'
+              ? 'M'
+              : context.preferences.gender,
+          totalCount: 100, // Default values
+          firstYear: 2020,
+          lastYear: 2024,
+          yearlyData: {
+            '2024': 50,
+            '2023': 45,
+            '2022': 40,
+            '2021': 35,
+            '2020': 30,
+          },
+        };
+
+        console.log(`Created mock entry for: "${gemmaSuggestion.name}"`);
+        enhancedRecommendations.push({
+          name: mockName,
+          aiScore: gemmaSuggestion.compatibility.overall,
+          gemmaInsights: gemmaSuggestion,
+          isGemmaRecommended: true,
+        });
+      }
+    }
+
+    // Add remaining traditional recommendations
+    for (const traditionalName of traditionalMap.values()) {
+      enhancedRecommendations.push({
+        name: traditionalName,
+        aiScore: (traditionalName as any).aiScore,
+        gemmaInsights: undefined,
+        isGemmaRecommended: false,
+      });
+    }
+
+    // Sort by AI score and Gemma priority
+    enhancedRecommendations.sort((a, b) => {
+      // Prioritize Gemma recommendations
+      if (a.isGemmaRecommended && !b.isGemmaRecommended) return -1;
+      if (!a.isGemmaRecommended && b.isGemmaRecommended) return 1;
+
+      // Within each category, sort by score
+      if (a.isGemmaRecommended && b.isGemmaRecommended) {
+        return (
+          (b.gemmaInsights?.confidence || 0) -
+          (a.gemmaInsights?.confidence || 0)
+        );
+      }
+
+      return b.aiScore - a.aiScore;
+    });
+
+    // Return top 12 enhanced recommendations
+    return enhancedRecommendations.slice(0, 12);
+  } catch (error) {
+    console.error('Error generating Gemma-enhanced recommendations:', error);
+
+    // Fallback to traditional recommendations if Gemma fails
+    const traditionalRecommendations = await generateAIRecommendations(context);
+    return traditionalRecommendations.map((name) => ({
+      name,
+      aiScore: (name as any).aiScore,
+      gemmaInsights: undefined,
+      isGemmaRecommended: false,
+    }));
+  }
 }
 
 export interface NameSummary {

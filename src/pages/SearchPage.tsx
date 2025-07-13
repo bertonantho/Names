@@ -59,7 +59,7 @@ export const SearchPage: React.FC = () => {
           | 'alphabetical'
           | 'rarity'
           | 'trending',
-        limit: searchQuery.trim() ? 50 : 100,
+        limit: 300,
       });
       setResults(searchResults);
     } catch (error) {

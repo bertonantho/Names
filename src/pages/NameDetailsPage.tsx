@@ -7,7 +7,12 @@ import {
   ArrowTrendingUpIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
-import { searchNames, NameData } from '../services/namesApi';
+import {
+  searchNames,
+  NameData,
+  findSimilarNames,
+  findNamesWithSimilarCharacteristics,
+} from '../services/namesApi';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // Simple line chart component
@@ -167,6 +172,10 @@ const TrendChart: React.FC<{ data: NameData; color: string }> = ({
 export const NameDetailsPage: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const [nameData, setNameData] = useState<NameData[]>([]);
+  const [similarNames, setSimilarNames] = useState<NameData[]>([]);
+  const [similarCharacteristics, setSimilarCharacteristics] = useState<
+    NameData[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -187,6 +196,21 @@ export const NameDetailsPage: React.FC = () => {
         );
 
         setNameData(exactMatches);
+
+        // Load similar names if we have at least one exact match
+        if (exactMatches.length > 0) {
+          const primaryName = exactMatches[0];
+
+          // Load similar names and names with similar characteristics in parallel
+          const [similarNamesResults, similarCharacteristicsResults] =
+            await Promise.all([
+              findSimilarNames(name, primaryName.sex, 6),
+              findNamesWithSimilarCharacteristics(name, primaryName.sex, 6),
+            ]);
+
+          setSimilarNames(similarNamesResults);
+          setSimilarCharacteristics(similarCharacteristicsResults);
+        }
       } catch (error) {
         console.error('Error loading name data:', error);
       } finally {
@@ -390,38 +414,85 @@ export const NameDetailsPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Related Names */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">
-          Explore More Names
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/search?q=Gabriel"
-            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition-colors"
-          >
-            Gabriel
-          </Link>
-          <Link
-            to="/search?q=Emma"
-            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition-colors"
-          >
-            Emma
-          </Link>
-          <Link
-            to="/search?q=Louis"
-            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition-colors"
-          >
-            Louis
-          </Link>
-          <Link
-            to="/search?q=Louise"
-            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition-colors"
-          >
-            Louise
-          </Link>
+      {/* Similar Names */}
+      {similarNames.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            Names Similar to {name}
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Names with similar sounds, structure, and phonetic patterns
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {similarNames.map((similarName) => (
+              <Link
+                key={`${similarName.name}-${similarName.sex}`}
+                to={`/name/${similarName.name}`}
+                className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
+                      similarName.sex === 'M' ? 'bg-blue-500' : 'bg-pink-500'
+                    }`}
+                  >
+                    {similarName.name.charAt(0)}
+                  </div>
+                  <span className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                    {similarName.name}
+                  </span>
+                </div>
+                <span className="text-xs text-gray-500">
+                  {(similarName.yearlyData['2024'] || 0).toLocaleString()}{' '}
+                  births
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Names with Similar Characteristics */}
+      {similarCharacteristics.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            Names with Similar Style
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Names with similar length, syllables, and contemporary appeal
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {similarCharacteristics.map((characteristicName) => (
+              <Link
+                key={`${characteristicName.name}-${characteristicName.sex}`}
+                to={`/name/${characteristicName.name}`}
+                className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
+                      characteristicName.sex === 'M'
+                        ? 'bg-blue-500'
+                        : 'bg-pink-500'
+                    }`}
+                  >
+                    {characteristicName.name.charAt(0)}
+                  </div>
+                  <span className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                    {characteristicName.name}
+                  </span>
+                </div>
+                <span className="text-xs text-gray-500">
+                  {(
+                    characteristicName.yearlyData['2024'] || 0
+                  ).toLocaleString()}{' '}
+                  births
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

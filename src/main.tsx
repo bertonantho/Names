@@ -6,6 +6,7 @@ import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
 import { SearchPage } from './pages/SearchPage';
 import { NameDetailsPage } from './pages/NameDetailsPage';
+import { AIRecommendationsPage } from './pages/AIRecommendationsPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 import { CollectionsPage } from './pages/CollectionsPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -36,6 +37,14 @@ function App() {
           element={
             <Layout>
               <NameDetailsPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/ai-recommendations"
+          element={
+            <Layout>
+              <AIRecommendationsPage />
             </Layout>
           }
         />

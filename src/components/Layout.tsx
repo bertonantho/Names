@@ -37,6 +37,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 Search
               </Link>
               <Link
+                to="/ai-recommendations"
+                className="text-gray-700 hover:text-primary font-medium"
+              >
+                AI Recommendations
+              </Link>
+              <Link
                 to="/favorites"
                 className="text-gray-700 hover:text-primary font-medium"
               >
