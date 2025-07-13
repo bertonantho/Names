@@ -33,14 +33,20 @@
   .bg-primary-50 {
     background-color: rgb(var(--color-primary-50));
   }
+  .bg-primary-100 {
+    background-color: rgb(var(--color-primary-100));
+  }
   .bg-primary-600 {
     background-color: rgb(var(--color-primary-600));
   }
   .border-primary {
     border-color: rgb(var(--color-primary));
   }
-  .border-t-primary {
-    border-top-color: rgb(var(--color-primary));
+  .border-primary-200 {
+    border-color: rgb(var(--color-primary-200));
+  }
+  .hover\:bg-primary-600:hover {
+    background-color: rgb(var(--color-primary-600));
   }
   .focus\:ring-primary:focus {
     --tw-ring-color: rgb(var(--color-primary));
