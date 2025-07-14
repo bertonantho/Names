@@ -1,9 +1,20 @@
 import {
   supabase,
+  isConfigured,
   FrenchName,
   Department,
   NameStatistics,
 } from '../lib/supabase';
+import {
+  searchNamesFallback,
+  getNameDetailsFallback,
+  getTrendingNamesFallback,
+  getDepartmentDataFallback,
+  getAvailableYearsForNameFallback,
+  getPopularNamesFallback,
+  getSimilarNamesFallback,
+  getAppStatisticsFallback,
+} from './fallbackData';
 
 // Legacy interface compatibility (to avoid breaking existing components)
 export interface NameData {
@@ -36,6 +47,17 @@ export interface TrendingName {
 }
 
 // Convert database sex format to display format
+// Helper function to check if Supabase is available
+function checkSupabaseConfig(): boolean {
+  if (!isConfigured || !supabase) {
+    console.warn(
+      'Supabase is not configured. Please set environment variables.'
+    );
+    return false;
+  }
+  return true;
+}
+
 export function convertSex(dbSex: 'M' | 'F'): 'M' | 'F' {
   return dbSex;
 }
@@ -53,6 +75,10 @@ export async function searchNames(
   gender?: 'M' | 'F',
   limit: number = 50
 ): Promise<SearchResult[]> {
+  if (!checkSupabaseConfig()) {
+    return searchNamesFallback(query, gender, limit);
+  }
+
   try {
     const { data, error } = await supabase.rpc('search_names', {
       p_query: query,
@@ -85,6 +111,10 @@ export async function getNameDetails(
   name: string,
   sex: 'M' | 'F'
 ): Promise<NameData | null> {
+  if (!checkSupabaseConfig()) {
+    return getNameDetailsFallback(name, sex);
+  }
+
   try {
     // Get yearly data using the database function
     const { data: yearlyData, error: yearlyError } = await supabase.rpc(
@@ -249,7 +279,7 @@ export async function getAvailableYearsForName(
       throw error;
     }
 
-    return (data || []).map((item) => item.time_period);
+    return (data || []).map((item: any) => item.time_period);
   } catch (error) {
     console.error('Error fetching available years:', error);
     return [];
@@ -284,7 +314,7 @@ export async function getPopularNames(
       throw error;
     }
 
-    return (data || []).map((item, index) => ({
+    return (data || []).map((item: any, index: number) => ({
       name: item.first_name,
       sex: convertSex(item.sex),
       totalBirths: item.obs_value,
@@ -328,7 +358,7 @@ export async function getSimilarNames(
       throw error;
     }
 
-    return (data || []).map((item) => ({
+    return (data || []).map((item: any) => ({
       name: item.first_name,
       sex: convertSex(item.sex),
       totalBirths: item.total_births,

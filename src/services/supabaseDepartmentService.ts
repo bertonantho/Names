@@ -59,8 +59,10 @@ export async function getAvailableYearsForName(
     }
 
     // Get unique years
-    const years = [...new Set((data || []).map((item) => item.time_period))];
-    return years.sort((a, b) => b - a); // Sort descending
+    const years = [
+      ...new Set((data || []).map((item: any) => item.time_period)),
+    ] as number[];
+    return years.sort((a: number, b: number) => b - a); // Sort descending
   } catch (error) {
     console.error('Error fetching available years:', error);
     return [];
