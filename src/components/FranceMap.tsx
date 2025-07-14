@@ -3,7 +3,7 @@ import { NameData } from '../services/namesApi';
 import {
   getDepartmentData,
   getAvailableYearsForName,
-} from '../services/departmentService';
+} from '../services/supabaseDepartmentService';
 
 interface FranceMapProps {
   nameData?: NameData;
