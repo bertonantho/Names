@@ -1,0 +1,486 @@
+{
+  "boys": [
+    {
+      "name": "IZAHO",
+      "sex": "M",
+      "current": 25,
+      "previous": 5,
+      "growthRate": 9,
+      "totalCount": 35
+    },
+    {
+      "name": "SUHAYB",
+      "sex": "M",
+      "current": 40,
+      "previous": 5,
+      "growthRate": 7,
+      "totalCount": 135
+    },
+    {
+      "name": "DAYYAN",
+      "sex": "M",
+      "current": 20,
+      "previous": 0,
+      "growthRate": 7,
+      "totalCount": 75
+    },
+    {
+      "name": "TAYEM",
+      "sex": "M",
+      "current": 70,
+      "previous": 10,
+      "growthRate": 6,
+      "totalCount": 105
+    },
+    {
+      "name": "PAUL-ANDRE",
+      "sex": "M",
+      "current": 15,
+      "previous": 5,
+      "growthRate": 5,
+      "totalCount": 370
+    },
+    {
+      "name": "MAEVAN",
+      "sex": "M",
+      "current": 15,
+      "previous": 0,
+      "growthRate": 5,
+      "totalCount": 185
+    },
+    {
+      "name": "TIHAM",
+      "sex": "M",
+      "current": 15,
+      "previous": 0,
+      "growthRate": 5,
+      "totalCount": 50
+    },
+    {
+      "name": "OUSAYD",
+      "sex": "M",
+      "current": 30,
+      "previous": 10,
+      "growthRate": 5,
+      "totalCount": 40
+    },
+    {
+      "name": "LEVEN",
+      "sex": "M",
+      "current": 15,
+      "previous": 0,
+      "growthRate": 5,
+      "totalCount": 35
+    },
+    {
+      "name": "EJAZ",
+      "sex": "M",
+      "current": 15,
+      "previous": 5,
+      "growthRate": 5,
+      "totalCount": 20
+    },
+    {
+      "name": "YANIL",
+      "sex": "M",
+      "current": 25,
+      "previous": 5,
+      "growthRate": 4,
+      "totalCount": 130
+    },
+    {
+      "name": "OUSSAID",
+      "sex": "M",
+      "current": 360,
+      "previous": 175,
+      "growthRate": 3.1142857142857143,
+      "totalCount": 540
+    },
+    {
+      "name": "CYRILLE",
+      "sex": "M",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 36885
+    },
+    {
+      "name": "WILFRIED",
+      "sex": "M",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 12945
+    },
+    {
+      "name": "CARMELO",
+      "sex": "M",
+      "current": 10,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 1300
+    },
+    {
+      "name": "RAMAZAN",
+      "sex": "M",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 1015
+    },
+    {
+      "name": "ELIEZER",
+      "sex": "M",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 355
+    },
+    {
+      "name": "HADRIEL",
+      "sex": "M",
+      "current": 90,
+      "previous": 25,
+      "growthRate": 3,
+      "totalCount": 310
+    },
+    {
+      "name": "KAROL",
+      "sex": "M",
+      "current": 10,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 305
+    },
+    {
+      "name": "SOULEIMANE",
+      "sex": "M",
+      "current": 10,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 240
+    },
+    {
+      "name": "MOHAMED-AZIZ",
+      "sex": "M",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 220
+    },
+    {
+      "name": "AITOR",
+      "sex": "M",
+      "current": 10,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 210
+    },
+    {
+      "name": "KELIM",
+      "sex": "M",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 180
+    },
+    {
+      "name": "KELYANE",
+      "sex": "M",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 175
+    },
+    {
+      "name": "LOUCIAN",
+      "sex": "M",
+      "current": 10,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 145
+    },
+    {
+      "name": "KABA",
+      "sex": "M",
+      "current": 10,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 145
+    },
+    {
+      "name": "TYM",
+      "sex": "M",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 140
+    },
+    {
+      "name": "EITHAN",
+      "sex": "M",
+      "current": 10,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 135
+    },
+    {
+      "name": "MEYLAN",
+      "sex": "M",
+      "current": 40,
+      "previous": 10,
+      "growthRate": 3,
+      "totalCount": 135
+    },
+    {
+      "name": "WASSYM",
+      "sex": "M",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 120
+    }
+  ],
+  "girls": [
+    {
+      "name": "SOLEIA",
+      "sex": "F",
+      "current": 50,
+      "previous": 5,
+      "growthRate": 19,
+      "totalCount": 65
+    },
+    {
+      "name": "AYLE",
+      "sex": "F",
+      "current": 50,
+      "previous": 5,
+      "growthRate": 19,
+      "totalCount": 55
+    },
+    {
+      "name": "ISALYA",
+      "sex": "F",
+      "current": 45,
+      "previous": 10,
+      "growthRate": 8,
+      "totalCount": 65
+    },
+    {
+      "name": "LENIE",
+      "sex": "F",
+      "current": 65,
+      "previous": 10,
+      "growthRate": 7.666666666666667,
+      "totalCount": 425
+    },
+    {
+      "name": "AELLA",
+      "sex": "F",
+      "current": 20,
+      "previous": 5,
+      "growthRate": 7,
+      "totalCount": 85
+    },
+    {
+      "name": "MILAYA",
+      "sex": "F",
+      "current": 75,
+      "previous": 15,
+      "growthRate": 6.5,
+      "totalCount": 130
+    },
+    {
+      "name": "EILY",
+      "sex": "F",
+      "current": 35,
+      "previous": 5,
+      "growthRate": 6,
+      "totalCount": 55
+    },
+    {
+      "name": "ISALIA",
+      "sex": "F",
+      "current": 75,
+      "previous": 15,
+      "growthRate": 5,
+      "totalCount": 120
+    },
+    {
+      "name": "ZOHA",
+      "sex": "F",
+      "current": 15,
+      "previous": 0,
+      "growthRate": 5,
+      "totalCount": 85
+    },
+    {
+      "name": "TAISSYA",
+      "sex": "F",
+      "current": 15,
+      "previous": 0,
+      "growthRate": 5,
+      "totalCount": 55
+    },
+    {
+      "name": "ROBBIE",
+      "sex": "F",
+      "current": 15,
+      "previous": 5,
+      "growthRate": 5,
+      "totalCount": 40
+    },
+    {
+      "name": "UMAY",
+      "sex": "F",
+      "current": 15,
+      "previous": 5,
+      "growthRate": 5,
+      "totalCount": 35
+    },
+    {
+      "name": "SOELIA",
+      "sex": "F",
+      "current": 15,
+      "previous": 5,
+      "growthRate": 5,
+      "totalCount": 25
+    },
+    {
+      "name": "SIERRAH",
+      "sex": "F",
+      "current": 15,
+      "previous": 5,
+      "growthRate": 5,
+      "totalCount": 20
+    },
+    {
+      "name": "TAIRA",
+      "sex": "F",
+      "current": 25,
+      "previous": 5,
+      "growthRate": 4,
+      "totalCount": 175
+    },
+    {
+      "name": "KAYLIANA",
+      "sex": "F",
+      "current": 25,
+      "previous": 5,
+      "growthRate": 4,
+      "totalCount": 75
+    },
+    {
+      "name": "NUSAYBAH",
+      "sex": "F",
+      "current": 25,
+      "previous": 10,
+      "growthRate": 4,
+      "totalCount": 45
+    },
+    {
+      "name": "SOLEYA",
+      "sex": "F",
+      "current": 70,
+      "previous": 20,
+      "growthRate": 3.6666666666666665,
+      "totalCount": 135
+    },
+    {
+      "name": "ODETTE",
+      "sex": "F",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 192575
+    },
+    {
+      "name": "GAETANE",
+      "sex": "F",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 5665
+    },
+    {
+      "name": "ALIETTE",
+      "sex": "F",
+      "current": 10,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 3885
+    },
+    {
+      "name": "HULYA",
+      "sex": "F",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 885
+    },
+    {
+      "name": "MAELI",
+      "sex": "F",
+      "current": 10,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 720
+    },
+    {
+      "name": "ANNABELLA",
+      "sex": "F",
+      "current": 10,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 720
+    },
+    {
+      "name": "LORIANA",
+      "sex": "F",
+      "current": 30,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 555
+    },
+    {
+      "name": "NEIGE",
+      "sex": "F",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 335
+    },
+    {
+      "name": "RANDA",
+      "sex": "F",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 335
+    },
+    {
+      "name": "MELINEE",
+      "sex": "F",
+      "current": 20,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 275
+    },
+    {
+      "name": "CHANI",
+      "sex": "F",
+      "current": 10,
+      "previous": 5,
+      "growthRate": 3,
+      "totalCount": 215
+    },
+    {
+      "name": "KHAIRA",
+      "sex": "F",
+      "current": 10,
+      "previous": 0,
+      "growthRate": 3,
+      "totalCount": 210
+    }
+  ]
+}

@@ -8,6 +8,19 @@ async function splitJsonData() {
   // Paths
   const inputPath = path.join(__dirname, '../public/data/processed_names.json');
   const outputDir = path.join(__dirname, '../public/data');
+  const manifestPath = path.join(outputDir, 'manifest.json');
+  
+  // Check if split data already exists (for production builds)
+  if (fs.existsSync(manifestPath)) {
+    console.log('Split data already exists, skipping generation...');
+    return;
+  }
+  
+  // Check if source file exists
+  if (!fs.existsSync(inputPath)) {
+    console.error('Source file processed_names.json not found. Please run "npm run process-csv" first or ensure split files are committed.');
+    process.exit(1);
+  }
   
   // Ensure output directory exists
   if (!fs.existsSync(outputDir)) {

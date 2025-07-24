@@ -5,5 +5,10 @@ dist-ssr
 *.local
 .env
 
+# Exclude original large CSV and processed JSON files
 data/
+
+# Exclude the large processed file but include the split files
+public/data/processed_names.json
+
 .vercel

@@ -1,0 +1,1218 @@
+{
+  "2023": {
+    "boys": [
+      {
+        "name": "GABRIEL",
+        "sex": "M",
+        "births": 4560,
+        "totalCount": 207490
+      },
+      {
+        "name": "LEO",
+        "sex": "M",
+        "births": 3670,
+        "totalCount": 131560
+      },
+      {
+        "name": "RAPHAEL",
+        "sex": "M",
+        "births": 3635,
+        "totalCount": 166985
+      },
+      {
+        "name": "MAEL",
+        "sex": "M",
+        "births": 3420,
+        "totalCount": 77455
+      },
+      {
+        "name": "LOUIS",
+        "sex": "M",
+        "births": 3335,
+        "totalCount": 539215
+      },
+      {
+        "name": "NOAH",
+        "sex": "M",
+        "births": 3165,
+        "totalCount": 71900
+      },
+      {
+        "name": "JULES",
+        "sex": "M",
+        "births": 3020,
+        "totalCount": 172935
+      },
+      {
+        "name": "ADAM",
+        "sex": "M",
+        "births": 2970,
+        "totalCount": 82495
+      },
+      {
+        "name": "ARTHUR",
+        "sex": "M",
+        "births": 2915,
+        "totalCount": 138390
+      },
+      {
+        "name": "EDEN",
+        "sex": "M",
+        "births": 2710,
+        "totalCount": 29660
+      },
+      {
+        "name": "ISAAC",
+        "sex": "M",
+        "births": 2570,
+        "totalCount": 26860
+      },
+      {
+        "name": "LIAM",
+        "sex": "M",
+        "births": 2500,
+        "totalCount": 47335
+      },
+      {
+        "name": "SACHA",
+        "sex": "M",
+        "births": 2445,
+        "totalCount": 63735
+      },
+      {
+        "name": "LUCAS",
+        "sex": "M",
+        "births": 2325,
+        "totalCount": 178955
+      },
+      {
+        "name": "LEON",
+        "sex": "M",
+        "births": 2295,
+        "totalCount": 135250
+      },
+      {
+        "name": "NAEL",
+        "sex": "M",
+        "births": 2255,
+        "totalCount": 32155
+      },
+      {
+        "name": "GABIN",
+        "sex": "M",
+        "births": 2245,
+        "totalCount": 52420
+      },
+      {
+        "name": "MOHAMED",
+        "sex": "M",
+        "births": 2135,
+        "totalCount": 100110
+      },
+      {
+        "name": "ELIO",
+        "sex": "M",
+        "births": 2060,
+        "totalCount": 17330
+      },
+      {
+        "name": "HUGO",
+        "sex": "M",
+        "births": 2030,
+        "totalCount": 154875
+      },
+      {
+        "name": "NOE",
+        "sex": "M",
+        "births": 2010,
+        "totalCount": 52585
+      },
+      {
+        "name": "ETHAN",
+        "sex": "M",
+        "births": 1980,
+        "totalCount": 74890
+      },
+      {
+        "name": "MARCEAU",
+        "sex": "M",
+        "births": 1960,
+        "totalCount": 34445
+      },
+      {
+        "name": "AARON",
+        "sex": "M",
+        "births": 1955,
+        "totalCount": 37935
+      },
+      {
+        "name": "PAUL",
+        "sex": "M",
+        "births": 1950,
+        "totalCount": 429695
+      },
+      {
+        "name": "AYDEN",
+        "sex": "M",
+        "births": 1860,
+        "totalCount": 15100
+      },
+      {
+        "name": "IMRAN",
+        "sex": "M",
+        "births": 1770,
+        "totalCount": 18345
+      },
+      {
+        "name": "NATHAN",
+        "sex": "M",
+        "births": 1700,
+        "totalCount": 121995
+      },
+      {
+        "name": "THEO",
+        "sex": "M",
+        "births": 1660,
+        "totalCount": 132530
+      },
+      {
+        "name": "MARIUS",
+        "sex": "M",
+        "births": 1620,
+        "totalCount": 90730
+      },
+      {
+        "name": "IBRAHIM",
+        "sex": "M",
+        "births": 1620,
+        "totalCount": 25290
+      },
+      {
+        "name": "MALO",
+        "sex": "M",
+        "births": 1570,
+        "totalCount": 26160
+      },
+      {
+        "name": "ANDREA",
+        "sex": "M",
+        "births": 1515,
+        "totalCount": 15405
+      },
+      {
+        "name": "ELIOTT",
+        "sex": "M",
+        "births": 1470,
+        "totalCount": 29535
+      },
+      {
+        "name": "TOM",
+        "sex": "M",
+        "births": 1455,
+        "totalCount": 93480
+      },
+      {
+        "name": "NINO",
+        "sex": "M",
+        "births": 1455,
+        "totalCount": 23690
+      },
+      {
+        "name": "MATHIS",
+        "sex": "M",
+        "births": 1420,
+        "totalCount": 89670
+      },
+      {
+        "name": "VICTOR",
+        "sex": "M",
+        "births": 1415,
+        "totalCount": 135445
+      },
+      {
+        "name": "MARTIN",
+        "sex": "M",
+        "births": 1410,
+        "totalCount": 71915
+      },
+      {
+        "name": "LYAM",
+        "sex": "M",
+        "births": 1370,
+        "totalCount": 16475
+      },
+      {
+        "name": "GASPARD",
+        "sex": "M",
+        "births": 1350,
+        "totalCount": 28275
+      },
+      {
+        "name": "ISMAEL",
+        "sex": "M",
+        "births": 1270,
+        "totalCount": 27260
+      },
+      {
+        "name": "TIMEO",
+        "sex": "M",
+        "births": 1210,
+        "totalCount": 48720
+      },
+      {
+        "name": "MILO",
+        "sex": "M",
+        "births": 1205,
+        "totalCount": 16535
+      },
+      {
+        "name": "AUGUSTIN",
+        "sex": "M",
+        "births": 1200,
+        "totalCount": 47495
+      },
+      {
+        "name": "ROBIN",
+        "sex": "M",
+        "births": 1180,
+        "totalCount": 58530
+      },
+      {
+        "name": "VALENTIN",
+        "sex": "M",
+        "births": 1175,
+        "totalCount": 116320
+      },
+      {
+        "name": "LEANDRE",
+        "sex": "M",
+        "births": 1170,
+        "totalCount": 19355
+      },
+      {
+        "name": "AXEL",
+        "sex": "M",
+        "births": 1155,
+        "totalCount": 88860
+      },
+      {
+        "name": "ANTOINE",
+        "sex": "M",
+        "births": 1130,
+        "totalCount": 284260
+      }
+    ],
+    "girls": [
+      {
+        "name": "LOUISE",
+        "sex": "F",
+        "births": 3185,
+        "totalCount": 284955
+      },
+      {
+        "name": "AMBRE",
+        "sex": "F",
+        "births": 3170,
+        "totalCount": 62345
+      },
+      {
+        "name": "ALBA",
+        "sex": "F",
+        "births": 3090,
+        "totalCount": 14690
+      },
+      {
+        "name": "JADE",
+        "sex": "F",
+        "births": 2895,
+        "totalCount": 107400
+      },
+      {
+        "name": "EMMA",
+        "sex": "F",
+        "births": 2665,
+        "totalCount": 173855
+      },
+      {
+        "name": "ROSE",
+        "sex": "F",
+        "births": 2375,
+        "totalCount": 115420
+      },
+      {
+        "name": "EVA",
+        "sex": "F",
+        "births": 2360,
+        "totalCount": 96770
+      },
+      {
+        "name": "ALMA",
+        "sex": "F",
+        "births": 2340,
+        "totalCount": 12160
+      },
+      {
+        "name": "ALICE",
+        "sex": "F",
+        "births": 2255,
+        "totalCount": 208595
+      },
+      {
+        "name": "ROMY",
+        "sex": "F",
+        "births": 2200,
+        "totalCount": 23275
+      },
+      {
+        "name": "MIA",
+        "sex": "F",
+        "births": 2155,
+        "totalCount": 27860
+      },
+      {
+        "name": "ANNA",
+        "sex": "F",
+        "births": 2125,
+        "totalCount": 126215
+      },
+      {
+        "name": "LINA",
+        "sex": "F",
+        "births": 2085,
+        "totalCount": 73110
+      },
+      {
+        "name": "LENA",
+        "sex": "F",
+        "births": 1910,
+        "totalCount": 72710
+      },
+      {
+        "name": "INAYA",
+        "sex": "F",
+        "births": 1870,
+        "totalCount": 26725
+      },
+      {
+        "name": "JULIA",
+        "sex": "F",
+        "births": 1850,
+        "totalCount": 80895
+      },
+      {
+        "name": "AGATHE",
+        "sex": "F",
+        "births": 1845,
+        "totalCount": 60170
+      },
+      {
+        "name": "LOU",
+        "sex": "F",
+        "births": 1840,
+        "totalCount": 53035
+      },
+      {
+        "name": "IRIS",
+        "sex": "F",
+        "births": 1785,
+        "totalCount": 23710
+      },
+      {
+        "name": "ELENA",
+        "sex": "F",
+        "births": 1775,
+        "totalCount": 39410
+      },
+      {
+        "name": "ADELE",
+        "sex": "F",
+        "births": 1690,
+        "totalCount": 51180
+      },
+      {
+        "name": "GIULIA",
+        "sex": "F",
+        "births": 1690,
+        "totalCount": 19455
+      },
+      {
+        "name": "CHARLIE",
+        "sex": "F",
+        "births": 1680,
+        "totalCount": 18985
+      },
+      {
+        "name": "VICTOIRE",
+        "sex": "F",
+        "births": 1635,
+        "totalCount": 32300
+      },
+      {
+        "name": "LEA",
+        "sex": "F",
+        "births": 1620,
+        "totalCount": 215820
+      },
+      {
+        "name": "CHLOE",
+        "sex": "F",
+        "births": 1615,
+        "totalCount": 165990
+      },
+      {
+        "name": "OLIVIA",
+        "sex": "F",
+        "births": 1610,
+        "totalCount": 48340
+      },
+      {
+        "name": "LUNA",
+        "sex": "F",
+        "births": 1555,
+        "totalCount": 31900
+      },
+      {
+        "name": "NOUR",
+        "sex": "F",
+        "births": 1555,
+        "totalCount": 19635
+      },
+      {
+        "name": "JEANNE",
+        "sex": "F",
+        "births": 1545,
+        "totalCount": 565855
+      },
+      {
+        "name": "JULIETTE",
+        "sex": "F",
+        "births": 1545,
+        "totalCount": 173760
+      },
+      {
+        "name": "NINA",
+        "sex": "F",
+        "births": 1480,
+        "totalCount": 49405
+      },
+      {
+        "name": "ZOE",
+        "sex": "F",
+        "births": 1455,
+        "totalCount": 73130
+      },
+      {
+        "name": "LEONIE",
+        "sex": "F",
+        "births": 1415,
+        "totalCount": 70015
+      },
+      {
+        "name": "INES",
+        "sex": "F",
+        "births": 1290,
+        "totalCount": 117530
+      },
+      {
+        "name": "SOFIA",
+        "sex": "F",
+        "births": 1285,
+        "totalCount": 32560
+      },
+      {
+        "name": "VICTORIA",
+        "sex": "F",
+        "births": 1250,
+        "totalCount": 45485
+      },
+      {
+        "name": "ROMANE",
+        "sex": "F",
+        "births": 1240,
+        "totalCount": 64470
+      },
+      {
+        "name": "LOLA",
+        "sex": "F",
+        "births": 1215,
+        "totalCount": 77540
+      },
+      {
+        "name": "LYA",
+        "sex": "F",
+        "births": 1155,
+        "totalCount": 15235
+      },
+      {
+        "name": "AVA",
+        "sex": "F",
+        "births": 1150,
+        "totalCount": 10440
+      },
+      {
+        "name": "ALYA",
+        "sex": "F",
+        "births": 1145,
+        "totalCount": 11530
+      },
+      {
+        "name": "EMY",
+        "sex": "F",
+        "births": 1125,
+        "totalCount": 18550
+      },
+      {
+        "name": "LUCIE",
+        "sex": "F",
+        "births": 1085,
+        "totalCount": 210975
+      },
+      {
+        "name": "ALIX",
+        "sex": "F",
+        "births": 1080,
+        "totalCount": 30510
+      },
+      {
+        "name": "CHARLOTTE",
+        "sex": "F",
+        "births": 1065,
+        "totalCount": 154035
+      },
+      {
+        "name": "LYANA",
+        "sex": "F",
+        "births": 1050,
+        "totalCount": 10845
+      },
+      {
+        "name": "MILA",
+        "sex": "F",
+        "births": 1010,
+        "totalCount": 31595
+      },
+      {
+        "name": "MARGAUX",
+        "sex": "F",
+        "births": 985,
+        "totalCount": 65255
+      },
+      {
+        "name": "ALBANE",
+        "sex": "F",
+        "births": 980,
+        "totalCount": 14760
+      }
+    ]
+  },
+  "2024": {
+    "boys": [
+      {
+        "name": "GABRIEL",
+        "sex": "M",
+        "births": 4565,
+        "totalCount": 207490
+      },
+      {
+        "name": "RAPHAEL",
+        "sex": "M",
+        "births": 3615,
+        "totalCount": 166985
+      },
+      {
+        "name": "LEO",
+        "sex": "M",
+        "births": 3520,
+        "totalCount": 131560
+      },
+      {
+        "name": "LOUIS",
+        "sex": "M",
+        "births": 3345,
+        "totalCount": 539215
+      },
+      {
+        "name": "NOAH",
+        "sex": "M",
+        "births": 3260,
+        "totalCount": 71900
+      },
+      {
+        "name": "ARTHUR",
+        "sex": "M",
+        "births": 3085,
+        "totalCount": 138390
+      },
+      {
+        "name": "ADAM",
+        "sex": "M",
+        "births": 3055,
+        "totalCount": 82495
+      },
+      {
+        "name": "JULES",
+        "sex": "M",
+        "births": 3030,
+        "totalCount": 172935
+      },
+      {
+        "name": "MAEL",
+        "sex": "M",
+        "births": 2980,
+        "totalCount": 77455
+      },
+      {
+        "name": "EDEN",
+        "sex": "M",
+        "births": 2710,
+        "totalCount": 29660
+      },
+      {
+        "name": "LEON",
+        "sex": "M",
+        "births": 2625,
+        "totalCount": 135250
+      },
+      {
+        "name": "LIAM",
+        "sex": "M",
+        "births": 2530,
+        "totalCount": 47335
+      },
+      {
+        "name": "ISAAC",
+        "sex": "M",
+        "births": 2530,
+        "totalCount": 26860
+      },
+      {
+        "name": "SACHA",
+        "sex": "M",
+        "births": 2420,
+        "totalCount": 63735
+      },
+      {
+        "name": "MARCEAU",
+        "sex": "M",
+        "births": 2290,
+        "totalCount": 34445
+      },
+      {
+        "name": "ELIO",
+        "sex": "M",
+        "births": 2265,
+        "totalCount": 17330
+      },
+      {
+        "name": "NOE",
+        "sex": "M",
+        "births": 2175,
+        "totalCount": 52585
+      },
+      {
+        "name": "LUCAS",
+        "sex": "M",
+        "births": 2170,
+        "totalCount": 178955
+      },
+      {
+        "name": "GABIN",
+        "sex": "M",
+        "births": 2025,
+        "totalCount": 52420
+      },
+      {
+        "name": "MOHAMED",
+        "sex": "M",
+        "births": 1995,
+        "totalCount": 100110
+      },
+      {
+        "name": "AARON",
+        "sex": "M",
+        "births": 1980,
+        "totalCount": 37935
+      },
+      {
+        "name": "IMRAN",
+        "sex": "M",
+        "births": 1855,
+        "totalCount": 18345
+      },
+      {
+        "name": "AYDEN",
+        "sex": "M",
+        "births": 1855,
+        "totalCount": 15100
+      },
+      {
+        "name": "MALO",
+        "sex": "M",
+        "births": 1830,
+        "totalCount": 26160
+      },
+      {
+        "name": "PAUL",
+        "sex": "M",
+        "births": 1800,
+        "totalCount": 429695
+      },
+      {
+        "name": "ETHAN",
+        "sex": "M",
+        "births": 1750,
+        "totalCount": 74890
+      },
+      {
+        "name": "HUGO",
+        "sex": "M",
+        "births": 1710,
+        "totalCount": 154875
+      },
+      {
+        "name": "NAEL",
+        "sex": "M",
+        "births": 1695,
+        "totalCount": 32155
+      },
+      {
+        "name": "ANDREA",
+        "sex": "M",
+        "births": 1680,
+        "totalCount": 15405
+      },
+      {
+        "name": "IBRAHIM",
+        "sex": "M",
+        "births": 1610,
+        "totalCount": 25290
+      },
+      {
+        "name": "MARIUS",
+        "sex": "M",
+        "births": 1595,
+        "totalCount": 90730
+      },
+      {
+        "name": "ELIOTT",
+        "sex": "M",
+        "births": 1435,
+        "totalCount": 29535
+      },
+      {
+        "name": "NATHAN",
+        "sex": "M",
+        "births": 1430,
+        "totalCount": 121995
+      },
+      {
+        "name": "VICTOR",
+        "sex": "M",
+        "births": 1410,
+        "totalCount": 135445
+      },
+      {
+        "name": "THEO",
+        "sex": "M",
+        "births": 1375,
+        "totalCount": 132530
+      },
+      {
+        "name": "MARTIN",
+        "sex": "M",
+        "births": 1355,
+        "totalCount": 71915
+      },
+      {
+        "name": "TOM",
+        "sex": "M",
+        "births": 1300,
+        "totalCount": 93480
+      },
+      {
+        "name": "EZIO",
+        "sex": "M",
+        "births": 1260,
+        "totalCount": 8740
+      },
+      {
+        "name": "GASPARD",
+        "sex": "M",
+        "births": 1245,
+        "totalCount": 28275
+      },
+      {
+        "name": "MATHIS",
+        "sex": "M",
+        "births": 1240,
+        "totalCount": 89670
+      },
+      {
+        "name": "ISMAEL",
+        "sex": "M",
+        "births": 1230,
+        "totalCount": 27260
+      },
+      {
+        "name": "COME",
+        "sex": "M",
+        "births": 1215,
+        "totalCount": 17220
+      },
+      {
+        "name": "LEANDRE",
+        "sex": "M",
+        "births": 1200,
+        "totalCount": 19355
+      },
+      {
+        "name": "AMIR",
+        "sex": "M",
+        "births": 1175,
+        "totalCount": 19540
+      },
+      {
+        "name": "AUGUSTIN",
+        "sex": "M",
+        "births": 1145,
+        "totalCount": 47495
+      },
+      {
+        "name": "LYAM",
+        "sex": "M",
+        "births": 1145,
+        "totalCount": 16475
+      },
+      {
+        "name": "NINO",
+        "sex": "M",
+        "births": 1125,
+        "totalCount": 23690
+      },
+      {
+        "name": "AYLAN",
+        "sex": "M",
+        "births": 1125,
+        "totalCount": 7080
+      },
+      {
+        "name": "ANTOINE",
+        "sex": "M",
+        "births": 1090,
+        "totalCount": 284260
+      },
+      {
+        "name": "MILO",
+        "sex": "M",
+        "births": 1065,
+        "totalCount": 16535
+      }
+    ],
+    "girls": [
+      {
+        "name": "LOUISE",
+        "sex": "F",
+        "births": 3135,
+        "totalCount": 284955
+      },
+      {
+        "name": "JADE",
+        "sex": "F",
+        "births": 3060,
+        "totalCount": 107400
+      },
+      {
+        "name": "AMBRE",
+        "sex": "F",
+        "births": 2815,
+        "totalCount": 62345
+      },
+      {
+        "name": "ALBA",
+        "sex": "F",
+        "births": 2660,
+        "totalCount": 14690
+      },
+      {
+        "name": "EMMA",
+        "sex": "F",
+        "births": 2525,
+        "totalCount": 173855
+      },
+      {
+        "name": "ALMA",
+        "sex": "F",
+        "births": 2380,
+        "totalCount": 12160
+      },
+      {
+        "name": "ROMY",
+        "sex": "F",
+        "births": 2260,
+        "totalCount": 23275
+      },
+      {
+        "name": "ROSE",
+        "sex": "F",
+        "births": 2220,
+        "totalCount": 115420
+      },
+      {
+        "name": "ALICE",
+        "sex": "F",
+        "births": 2200,
+        "totalCount": 208595
+      },
+      {
+        "name": "ANNA",
+        "sex": "F",
+        "births": 2110,
+        "totalCount": 126215
+      },
+      {
+        "name": "MIA",
+        "sex": "F",
+        "births": 2090,
+        "totalCount": 27860
+      },
+      {
+        "name": "LOU",
+        "sex": "F",
+        "births": 2070,
+        "totalCount": 53035
+      },
+      {
+        "name": "INAYA",
+        "sex": "F",
+        "births": 2010,
+        "totalCount": 26725
+      },
+      {
+        "name": "ADELE",
+        "sex": "F",
+        "births": 1975,
+        "totalCount": 51180
+      },
+      {
+        "name": "LINA",
+        "sex": "F",
+        "births": 1940,
+        "totalCount": 73110
+      },
+      {
+        "name": "EVA",
+        "sex": "F",
+        "births": 1895,
+        "totalCount": 96770
+      },
+      {
+        "name": "JULIA",
+        "sex": "F",
+        "births": 1880,
+        "totalCount": 80895
+      },
+      {
+        "name": "IRIS",
+        "sex": "F",
+        "births": 1855,
+        "totalCount": 23710
+      },
+      {
+        "name": "AGATHE",
+        "sex": "F",
+        "births": 1845,
+        "totalCount": 60170
+      },
+      {
+        "name": "ELENA",
+        "sex": "F",
+        "births": 1810,
+        "totalCount": 39410
+      },
+      {
+        "name": "GIULIA",
+        "sex": "F",
+        "births": 1740,
+        "totalCount": 19455
+      },
+      {
+        "name": "CHARLIE",
+        "sex": "F",
+        "births": 1725,
+        "totalCount": 18985
+      },
+      {
+        "name": "LENA",
+        "sex": "F",
+        "births": 1720,
+        "totalCount": 72710
+      },
+      {
+        "name": "NOUR",
+        "sex": "F",
+        "births": 1720,
+        "totalCount": 19635
+      },
+      {
+        "name": "JEANNE",
+        "sex": "F",
+        "births": 1635,
+        "totalCount": 565855
+      },
+      {
+        "name": "OLIVIA",
+        "sex": "F",
+        "births": 1620,
+        "totalCount": 48340
+      },
+      {
+        "name": "LUNA",
+        "sex": "F",
+        "births": 1545,
+        "totalCount": 31900
+      },
+      {
+        "name": "VICTOIRE",
+        "sex": "F",
+        "births": 1535,
+        "totalCount": 32300
+      },
+      {
+        "name": "JULIETTE",
+        "sex": "F",
+        "births": 1510,
+        "totalCount": 173760
+      },
+      {
+        "name": "LEONIE",
+        "sex": "F",
+        "births": 1460,
+        "totalCount": 70015
+      },
+      {
+        "name": "ZOE",
+        "sex": "F",
+        "births": 1410,
+        "totalCount": 73130
+      },
+      {
+        "name": "CHLOE",
+        "sex": "F",
+        "births": 1395,
+        "totalCount": 165990
+      },
+      {
+        "name": "NINA",
+        "sex": "F",
+        "births": 1345,
+        "totalCount": 49405
+      },
+      {
+        "name": "LEA",
+        "sex": "F",
+        "births": 1340,
+        "totalCount": 215820
+      },
+      {
+        "name": "SOFIA",
+        "sex": "F",
+        "births": 1340,
+        "totalCount": 32560
+      },
+      {
+        "name": "ALYA",
+        "sex": "F",
+        "births": 1220,
+        "totalCount": 11530
+      },
+      {
+        "name": "CHARLOTTE",
+        "sex": "F",
+        "births": 1190,
+        "totalCount": 154035
+      },
+      {
+        "name": "ROMANE",
+        "sex": "F",
+        "births": 1185,
+        "totalCount": 64470
+      },
+      {
+        "name": "VICTORIA",
+        "sex": "F",
+        "births": 1180,
+        "totalCount": 45485
+      },
+      {
+        "name": "INES",
+        "sex": "F",
+        "births": 1080,
+        "totalCount": 117530
+      },
+      {
+        "name": "ESMEE",
+        "sex": "F",
+        "births": 1070,
+        "totalCount": 3775
+      },
+      {
+        "name": "AVA",
+        "sex": "F",
+        "births": 1060,
+        "totalCount": 10440
+      },
+      {
+        "name": "ALIX",
+        "sex": "F",
+        "births": 1020,
+        "totalCount": 30510
+      },
+      {
+        "name": "LUCIE",
+        "sex": "F",
+        "births": 1015,
+        "totalCount": 210975
+      },
+      {
+        "name": "LOLA",
+        "sex": "F",
+        "births": 980,
+        "totalCount": 77540
+      },
+      {
+        "name": "LYA",
+        "sex": "F",
+        "births": 965,
+        "totalCount": 15235
+      },
+      {
+        "name": "ALBANE",
+        "sex": "F",
+        "births": 925,
+        "totalCount": 14760
+      },
+      {
+        "name": "MILA",
+        "sex": "F",
+        "births": 910,
+        "totalCount": 31595
+      },
+      {
+        "name": "MARGOT",
+        "sex": "F",
+        "births": 905,
+        "totalCount": 50235
+      },
+      {
+        "name": "LYNA",
+        "sex": "F",
+        "births": 880,
+        "totalCount": 17050
+      }
+    ]
+  },
+  "2025": {
+    "boys": [],
+    "girls": []
+  }
+}

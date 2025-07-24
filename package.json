@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc && vite build",
+    "build": "npm run split-data && tsc && vite build",
     "dev": "vite",
     "serve": "vite preview",
     "format": "prettier --write .",

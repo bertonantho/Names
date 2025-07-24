@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-07-24T20:17:13.094Z",
+  "files": {
+    "summary": "summary.json",
+    "boys": "boys_names.json",
+    "girls": "girls_names.json",
+    "popular": "popular_by_year.json",
+    "trending": "trending_names.json",
+    "searchIndex": "search_index.json"
+  },
+  "chunks": {
+    "boys": {
+      "count": 22,
+      "pattern": "boys_chunk_{index}.json"
+    },
+    "girls": {
+      "count": 25,
+      "pattern": "girls_chunk_{index}.json"
+    }
+  },
+  "stats": {
+    "originalSize": 21132578,
+    "totalNames": 45851,
+    "boysNames": 21363,
+    "girlsNames": 24488
+  }
+}
