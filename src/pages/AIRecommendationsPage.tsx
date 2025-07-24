@@ -13,7 +13,7 @@ import {
   generateGemmaEnhancedRecommendations,
   EnhancedRecommendation,
   FamilyContext,
-} from '../services/namesApi';
+} from '../services/splitJsonApi';
 import {
   testGemmaConnection,
   debugGemmaConnection,

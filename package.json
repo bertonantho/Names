@@ -8,7 +8,9 @@
     "serve": "vite preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "split-data": "node scripts/split-json-data.cjs",
+    "process-csv": "node scripts/process-csv-data.cjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.4",

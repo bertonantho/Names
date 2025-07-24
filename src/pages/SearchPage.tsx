@@ -10,7 +10,7 @@ import {
   NameData,
   countLetters,
   countSyllables,
-} from '../services/namesApi';
+} from '../services/splitJsonApi';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
 export const SearchPage: React.FC = () => {

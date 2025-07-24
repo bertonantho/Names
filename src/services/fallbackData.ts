@@ -63,6 +63,7 @@ export function getNameDetailsFallback(
         lastYear: 2023,
         peakYear: 2010,
         peakBirths: 2500,
+        totalCount: 45000,
         trend: 'stable' as const,
       };
       resolve(mockData);

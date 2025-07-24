@@ -13,7 +13,7 @@ import {
   getPopularNamesByYear,
   NameSummary,
   NameData,
-} from '../services/namesApi';
+} from '../services/splitJsonApi';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
 export const HomePage: React.FC = () => {
@@ -260,10 +260,10 @@ export const HomePage: React.FC = () => {
       {/* CTA Section */}
       <section className="text-center py-16 bg-gradient-to-r from-primary-600 to-blue-600 rounded-2xl text-white">
         <SparklesIcon className="w-16 h-16 mx-auto mb-6 opacity-80" />
-        <h2 className="text-3xl font-bold mb-4">
+        <h2 className="text-3xl font-bold mb-4 text-white">
           Ready to Find Your Perfect Name?
         </h2>
-        <p className="text-xl mb-8 opacity-90">
+        <p className="text-xl mb-8 opacity-90 text-white">
           Start exploring our comprehensive database of French names today.
         </p>
         <Link

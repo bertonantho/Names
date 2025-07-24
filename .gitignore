@@ -6,5 +6,4 @@ dist-ssr
 .env
 
 data/
-public/
 .vercel

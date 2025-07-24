@@ -10,9 +10,10 @@ import {
 import {
   searchNames,
   NameData,
+  getNameDetails,
   findSimilarNames,
   findNamesWithSimilarCharacteristics,
-} from '../services/namesApi';
+} from '../services/splitJsonApi';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import FranceMap from '../components/FranceMap';
 
@@ -186,22 +187,30 @@ export const NameDetailsPage: React.FC = () => {
 
       setLoading(true);
       try {
-        // Search for exact matches of this name
-        const results = await searchNames({
+        // First, search for the name to get possible variants
+        const searchResults = await searchNames({
           query: name,
           limit: 10,
         });
 
         // Filter for exact matches
-        const exactMatches = results.filter(
+        const exactMatches = searchResults.filter(
           (n) => n.name.toLowerCase() === name.toLowerCase()
         );
 
-        setNameData(exactMatches);
+        // Load full details for each exact match using getNameDetails
+        const fullDetails = await Promise.all(
+          exactMatches.map(async (match) => {
+            const fullData = await getNameDetails(match.name, match.sex);
+            return fullData || match; // Fallback to search result if getNameDetails fails
+          })
+        );
+
+        setNameData(fullDetails.filter(Boolean));
 
         // Load similar names if we have at least one exact match
-        if (exactMatches.length > 0) {
-          const primaryName = exactMatches[0];
+        if (fullDetails.length > 0) {
+          const primaryName = fullDetails[0];
 
           // Load similar names and names with similar characteristics in parallel
           const [similarNamesResults, similarCharacteristicsResults] =
@@ -320,18 +329,30 @@ export const NameDetailsPage: React.FC = () => {
             </div>
 
             {/* Statistics */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-2xl font-bold text-gray-900">
+                  {(
+                    data.yearlyData['2024'] ||
+                    data.yearlyData['2023'] ||
+                    0
+                  ).toLocaleString()}
+                </div>
+                <div className="text-sm text-gray-600">2024 Births</div>
+              </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <div className="text-2xl font-bold text-gray-900">
                   {getTotalBirths(data).toLocaleString()}
                 </div>
-                <div className="text-sm text-gray-600">Total Births</div>
+                <div className="text-sm text-gray-600">Total Historic</div>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <div className="text-2xl font-bold text-gray-900">
-                  {data.yearlyData['2024'] || data.yearlyData['2023'] || 0}
+                  {getPeakYear(data).count.toLocaleString()}
                 </div>
-                <div className="text-sm text-gray-600">Recent (2024)</div>
+                <div className="text-sm text-gray-600">
+                  Peak Year ({getPeakYear(data).year})
+                </div>
               </div>
             </div>
 

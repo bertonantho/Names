@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NameData } from '../services/namesApi';
+import { NameData } from '../services/splitJsonApi';
 import {
   getDepartmentData,
   getAvailableYearsForName,
