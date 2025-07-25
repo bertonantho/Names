@@ -20,8 +20,6 @@ export const SearchPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     gender: searchParams.get('gender') || 'all',
-    minYear: parseInt(searchParams.get('minYear') || '1901'),
-    maxYear: parseInt(searchParams.get('maxYear') || '2024'),
     minLetters: parseInt(searchParams.get('minLetters') || '0') || undefined,
     maxLetters: parseInt(searchParams.get('maxLetters') || '0') || undefined,
     minSyllables:
@@ -30,10 +28,6 @@ export const SearchPage: React.FC = () => {
       parseInt(searchParams.get('maxSyllables') || '0') || undefined,
     minBirths2024:
       parseInt(searchParams.get('minBirths2024') || '0') || undefined,
-    minTrendingRate:
-      parseFloat(searchParams.get('minTrendingRate') || '0') || undefined,
-    maxTrendingRate:
-      parseFloat(searchParams.get('maxTrendingRate') || '0') || undefined,
     sortBy: searchParams.get('sortBy') || 'popularity',
   });
   const [showFilters, setShowFilters] = useState(false);
@@ -45,15 +39,11 @@ export const SearchPage: React.FC = () => {
         query: searchQuery.trim() || undefined,
         sex:
           filters.gender === 'all' ? undefined : (filters.gender as 'M' | 'F'),
-        minYear: filters.minYear,
-        maxYear: filters.maxYear,
         minLetters: filters.minLetters,
         maxLetters: filters.maxLetters,
         minSyllables: filters.minSyllables,
         maxSyllables: filters.maxSyllables,
         minBirths2024: filters.minBirths2024,
-        minTrendingRate: filters.minTrendingRate,
-        maxTrendingRate: filters.maxTrendingRate,
         sortBy: filters.sortBy as
           | 'popularity'
           | 'alphabetical'
@@ -80,10 +70,6 @@ export const SearchPage: React.FC = () => {
     const params = new URLSearchParams();
     if (searchQuery) params.set('q', searchQuery);
     if (filters.gender !== 'all') params.set('gender', filters.gender);
-    if (filters.minYear !== 1901)
-      params.set('minYear', filters.minYear.toString());
-    if (filters.maxYear !== 2024)
-      params.set('maxYear', filters.maxYear.toString());
     if (filters.minLetters)
       params.set('minLetters', filters.minLetters.toString());
     if (filters.maxLetters)
@@ -94,111 +80,25 @@ export const SearchPage: React.FC = () => {
       params.set('maxSyllables', filters.maxSyllables.toString());
     if (filters.minBirths2024)
       params.set('minBirths2024', filters.minBirths2024.toString());
-    if (filters.minTrendingRate)
-      params.set('minTrendingRate', filters.minTrendingRate.toString());
-    if (filters.maxTrendingRate)
-      params.set('maxTrendingRate', filters.maxTrendingRate.toString());
     if (filters.sortBy !== 'popularity') params.set('sortBy', filters.sortBy);
+
     setSearchParams(params);
   };
 
-  const handleFilterChange = (
-    key: string,
-    value: string | number | undefined
-  ) => {
-    setFilters((prev) => {
-      const newFilters = { ...prev, [key]: value };
-
-      // Ensure min doesn't exceed max for letters
-      if (
-        key === 'minLetters' &&
-        newFilters.maxLetters &&
-        typeof value === 'number' &&
-        value > newFilters.maxLetters
-      ) {
-        newFilters.maxLetters = value;
-      }
-      if (
-        key === 'maxLetters' &&
-        newFilters.minLetters &&
-        typeof value === 'number' &&
-        value < newFilters.minLetters
-      ) {
-        newFilters.minLetters = value;
-      }
-
-      // Ensure min doesn't exceed max for syllables
-      if (
-        key === 'minSyllables' &&
-        newFilters.maxSyllables &&
-        typeof value === 'number' &&
-        value > newFilters.maxSyllables
-      ) {
-        newFilters.maxSyllables = value;
-      }
-      if (
-        key === 'maxSyllables' &&
-        newFilters.minSyllables &&
-        typeof value === 'number' &&
-        value < newFilters.minSyllables
-      ) {
-        newFilters.minSyllables = value;
-      }
-
-      // Ensure min doesn't exceed max for trending rate
-      if (
-        key === 'minTrendingRate' &&
-        newFilters.maxTrendingRate &&
-        typeof value === 'number' &&
-        value > newFilters.maxTrendingRate
-      ) {
-        newFilters.maxTrendingRate = value;
-      }
-      if (
-        key === 'maxTrendingRate' &&
-        newFilters.minTrendingRate &&
-        typeof value === 'number' &&
-        value < newFilters.minTrendingRate
-      ) {
-        newFilters.minTrendingRate = value;
-      }
-
-      return newFilters;
-    });
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const getTotalBirths = (name: NameData) => {
-    return Object.values(name.yearlyData).reduce(
-      (sum, count) => sum + count,
-      0
-    );
-  };
-
-  const getRecentBirths = (name: NameData) => {
-    return name.yearlyData['2024'] || name.yearlyData['2023'] || 0;
-  };
-
-  const getTrendingKPIs = (name: NameData) => {
+  const getTrendData = (name: NameData) => {
     const count2024 = name.yearlyData['2024'] || 0;
     const count2023 = name.yearlyData['2023'] || 0;
     const count2022 = name.yearlyData['2022'] || 0;
 
-    // Calculate growth rate (2024 vs 2023)
-    const growthRate =
-      count2023 > 0 ? count2024 / count2023 : count2024 > 0 ? Infinity : 0;
-
-    // Calculate absolute change
+    const growthRate = count2023 > 0 ? count2024 / count2023 : 0;
     const absoluteChange = count2024 - count2023;
-
-    // Calculate percentage change
     const percentageChange =
-      count2023 > 0
-        ? ((count2024 - count2023) / count2023) * 100
-        : count2024 > 0
-          ? Infinity
-          : 0;
+      count2023 > 0 ? ((count2024 - count2023) / count2023) * 100 : 0;
 
-    // Determine trend direction
     let trendDirection = 'stable';
     let trendColor = 'text-gray-500';
     let trendIcon = '→';
@@ -258,202 +158,180 @@ export const SearchPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Filters */}
+          {/* Modern Mobile-Friendly Filters */}
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 p-4 bg-gray-50 rounded-lg">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gender
-                </label>
-                <select
-                  value={filters.gender}
-                  onChange={(e) => handleFilterChange('gender', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="all">All</option>
-                  <option value="M">Boys</option>
-                  <option value="F">Girls</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  From Year
-                </label>
-                <input
-                  type="number"
-                  min="1901"
-                  max="2024"
-                  value={filters.minYear}
-                  onChange={(e) =>
-                    handleFilterChange('minYear', parseInt(e.target.value))
-                  }
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  To Year
-                </label>
-                <input
-                  type="number"
-                  min="1901"
-                  max="2024"
-                  value={filters.maxYear}
-                  onChange={(e) =>
-                    handleFilterChange('maxYear', parseInt(e.target.value))
-                  }
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Letters ({filters.minLetters || 1} -{' '}
-                  {filters.maxLetters || 20})
-                </label>
-                <div className="space-y-2">
-                  <input
-                    type="range"
-                    min="1"
-                    max="20"
-                    value={filters.minLetters || 1}
+            <div className="space-y-6 p-6 bg-gray-50 rounded-lg">
+              {/* Basic Filters Row */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Gender
+                  </label>
+                  <select
+                    value={filters.gender}
                     onChange={(e) =>
-                      handleFilterChange('minLetters', parseInt(e.target.value))
+                      handleFilterChange('gender', e.target.value)
                     }
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
-                    style={{
-                      background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${(((filters.minLetters || 1) - 1) * 100) / 19}%, #E5E7EB ${(((filters.minLetters || 1) - 1) * 100) / 19}%, #E5E7EB 100%)`,
-                    }}
-                  />
-                  <input
-                    type="range"
-                    min="1"
-                    max="20"
-                    value={filters.maxLetters || 20}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="all">All Genders</option>
+                    <option value="M">Boys Only</option>
+                    <option value="F">Girls Only</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Sort By
+                  </label>
+                  <select
+                    value={filters.sortBy}
                     onChange={(e) =>
-                      handleFilterChange('maxLetters', parseInt(e.target.value))
+                      handleFilterChange('sortBy', e.target.value)
                     }
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
-                    style={{
-                      background: `linear-gradient(to right, #E5E7EB 0%, #E5E7EB ${(((filters.maxLetters || 20) - 1) * 100) / 19}%, #3B82F6 ${(((filters.maxLetters || 20) - 1) * 100) / 19}%, #3B82F6 100%)`,
-                    }}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="popularity">Most Popular 2024</option>
+                    <option value="trending">Trending Up</option>
+                    <option value="rarity">Most Rare</option>
+                    <option value="alphabetical">A-Z</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Min Births 2024
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10000"
+                    value={filters.minBirths2024 || ''}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        'minBirths2024',
+                        e.target.value ? parseInt(e.target.value) : undefined
+                      )
+                    }
+                    placeholder="e.g. 100"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Syllables ({filters.minSyllables || 1} -{' '}
-                  {filters.maxSyllables || 10})
-                </label>
-                <div className="space-y-2">
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={filters.minSyllables || 1}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        'minSyllables',
-                        parseInt(e.target.value)
-                      )
-                    }
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
-                    style={{
-                      background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${(((filters.minSyllables || 1) - 1) * 100) / 9}%, #E5E7EB ${(((filters.minSyllables || 1) - 1) * 100) / 9}%, #E5E7EB 100%)`,
-                    }}
-                  />
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={filters.maxSyllables || 10}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        'maxSyllables',
-                        parseInt(e.target.value)
-                      )
-                    }
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
-                    style={{
-                      background: `linear-gradient(to right, #E5E7EB 0%, #E5E7EB ${(((filters.maxSyllables || 10) - 1) * 100) / 9}%, #3B82F6 ${(((filters.maxSyllables || 10) - 1) * 100) / 9}%, #3B82F6 100%)`,
-                    }}
-                  />
+
+              {/* Mobile-Optimized Range Sliders */}
+              <div className="space-y-6">
+                {/* Name Length Slider */}
+                <div>
+                  <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
+                    <span>Name Length (Letters)</span>
+                    <span className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-xs font-semibold">
+                      {filters.minLetters || 1} - {filters.maxLetters || 20}
+                    </span>
+                  </label>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 w-8 font-medium">
+                          Min
+                        </span>
+                        <input
+                          type="range"
+                          min="1"
+                          max="20"
+                          value={filters.minLetters || 1}
+                          onChange={(e) =>
+                            handleFilterChange(
+                              'minLetters',
+                              parseInt(e.target.value)
+                            )
+                          }
+                          className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                        <span className="text-sm text-gray-900 w-8 text-right font-semibold">
+                          {filters.minLetters || 1}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 w-8 font-medium">
+                          Max
+                        </span>
+                        <input
+                          type="range"
+                          min="1"
+                          max="20"
+                          value={filters.maxLetters || 20}
+                          onChange={(e) =>
+                            handleFilterChange(
+                              'maxLetters',
+                              parseInt(e.target.value)
+                            )
+                          }
+                          className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                        <span className="text-sm text-gray-900 w-8 text-right font-semibold">
+                          {filters.maxLetters || 20}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Min Births 2024
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="10000"
-                  value={filters.minBirths2024 || ''}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      'minBirths2024',
-                      e.target.value ? parseInt(e.target.value) : undefined
-                    )
-                  }
-                  placeholder="Min births"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Trending ({(filters.minTrendingRate || 0).toFixed(1)}x -{' '}
-                  {(filters.maxTrendingRate || 5).toFixed(1)}x)
-                </label>
-                <div className="space-y-2">
-                  <input
-                    type="range"
-                    min="0"
-                    max="5"
-                    step="0.1"
-                    value={filters.minTrendingRate || 0}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        'minTrendingRate',
-                        parseFloat(e.target.value)
-                      )
-                    }
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
-                    style={{
-                      background: `linear-gradient(to right, #10B981 0%, #10B981 ${((filters.minTrendingRate || 0) * 100) / 5}%, #E5E7EB ${((filters.minTrendingRate || 0) * 100) / 5}%, #E5E7EB 100%)`,
-                    }}
-                  />
-                  <input
-                    type="range"
-                    min="0"
-                    max="5"
-                    step="0.1"
-                    value={filters.maxTrendingRate || 5}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        'maxTrendingRate',
-                        parseFloat(e.target.value)
-                      )
-                    }
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
-                    style={{
-                      background: `linear-gradient(to right, #E5E7EB 0%, #E5E7EB ${((filters.maxTrendingRate || 5) * 100) / 5}%, #10B981 ${((filters.maxTrendingRate || 5) * 100) / 5}%, #10B981 100%)`,
-                    }}
-                  />
+
+                {/* Syllables Slider */}
+                <div>
+                  <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
+                    <span>Number of Syllables</span>
+                    <span className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-xs font-semibold">
+                      {filters.minSyllables || 1} - {filters.maxSyllables || 10}
+                    </span>
+                  </label>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 w-8 font-medium">
+                          Min
+                        </span>
+                        <input
+                          type="range"
+                          min="1"
+                          max="10"
+                          value={filters.minSyllables || 1}
+                          onChange={(e) =>
+                            handleFilterChange(
+                              'minSyllables',
+                              parseInt(e.target.value)
+                            )
+                          }
+                          className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                        <span className="text-sm text-gray-900 w-8 text-right font-semibold">
+                          {filters.minSyllables || 1}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 w-8 font-medium">
+                          Max
+                        </span>
+                        <input
+                          type="range"
+                          min="1"
+                          max="10"
+                          value={filters.maxSyllables || 10}
+                          onChange={(e) =>
+                            handleFilterChange(
+                              'maxSyllables',
+                              parseInt(e.target.value)
+                            )
+                          }
+                          className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                        <span className="text-sm text-gray-900 w-8 text-right font-semibold">
+                          {filters.maxSyllables || 10}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sort By
-                </label>
-                <select
-                  value={filters.sortBy}
-                  onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="popularity">Popularity</option>
-                  <option value="trending">Trending</option>
-                  <option value="rarity">Rarity</option>
-                  <option value="alphabetical">Alphabetical</option>
-                </select>
               </div>
             </div>
           )}
@@ -498,87 +376,62 @@ export const SearchPage: React.FC = () => {
                   )}
                 </div>
               ) : (
-                results.map((name) => (
-                  <div
-                    key={`${name.name}-${name.sex}`}
-                    className="px-6 py-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="flex-shrink-0">
+                results.map((name) => {
+                  const trend = getTrendData(name);
+                  const letters = countLetters(name.name);
+                  const syllables = countSyllables(name.name);
+
+                  return (
+                    <div
+                      key={`${name.name}-${name.sex}`}
+                      className="px-6 py-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
                           <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
+                            className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
                               name.sex === 'M' ? 'bg-blue-600' : 'bg-pink-600'
                             }`}
                           >
                             {name.name.charAt(0)}
                           </div>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {name.name}
-                          </h3>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-1">
-                            <span>{name.sex === 'M' ? 'Boy' : 'Girl'}</span>
-                            <span>{countLetters(name.name)} letters</span>
-                            <span>{countSyllables(name.name)} syllables</span>
-                            <span>
-                              Total births:{' '}
-                              {getTotalBirths(name).toLocaleString()}
-                            </span>
-                            <span>
-                              2024: {getRecentBirths(name).toLocaleString()}
-                            </span>
+                          <div>
+                            <Link
+                              to={`/name/${name.name}`}
+                              className="text-lg font-semibold text-gray-900 hover:text-primary-600 transition-colors"
+                            >
+                              {name.name}
+                            </Link>
+                            <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                              <span>{name.sex === 'M' ? 'Boy' : 'Girl'}</span>
+                              <span>{letters} letters</span>
+                              <span>{syllables} syllables</span>
+                            </div>
                           </div>
-                          {(() => {
-                            const trendKPIs = getTrendingKPIs(name);
-                            return (
-                              <div className="flex items-center gap-4 text-xs">
-                                <span
-                                  className={`flex items-center gap-1 ${trendKPIs.trendColor}`}
-                                >
-                                  <span>{trendKPIs.trendIcon}</span>
-                                  <span>
-                                    {trendKPIs.percentageChange === Infinity
-                                      ? 'New'
-                                      : trendKPIs.percentageChange === 0
-                                        ? 'Stable'
-                                        : `${trendKPIs.percentageChange > 0 ? '+' : ''}${trendKPIs.percentageChange.toFixed(1)}%`}
-                                  </span>
-                                </span>
-                                <span className="text-gray-400">
-                                  2023: {trendKPIs.count2023.toLocaleString()}
-                                </span>
-                                <span className="text-gray-400">
-                                  Change:{' '}
-                                  {trendKPIs.absoluteChange > 0 ? '+' : ''}
-                                  {trendKPIs.absoluteChange.toLocaleString()}
-                                </span>
-                                {trendKPIs.growthRate !== Infinity &&
-                                  trendKPIs.growthRate > 0 && (
-                                    <span className="text-gray-400">
-                                      Growth: {trendKPIs.growthRate.toFixed(2)}x
-                                    </span>
-                                  )}
-                              </div>
-                            );
-                          })()}
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                          <HeartIcon className="w-5 h-5" />
-                        </button>
-                        <Link
-                          to={`/name/${name.name}`}
-                          className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
-                        >
-                          View Details
-                        </Link>
+                        <div className="text-right">
+                          <div className="text-lg font-semibold text-gray-900">
+                            {trend.count2024.toLocaleString()}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            2024 births
+                          </div>
+                          {trend.count2023 > 0 && (
+                            <div
+                              className={`text-sm ${trend.trendColor} flex items-center justify-end gap-1`}
+                            >
+                              <span>{trend.trendIcon}</span>
+                              <span>
+                                {trend.percentageChange > 0 ? '+' : ''}
+                                {trend.percentageChange.toFixed(1)}%
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
