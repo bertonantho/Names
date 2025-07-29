@@ -27,7 +27,7 @@ export const SignUpPage: React.FC = () => {
           error.message.includes('not configured')
         ) {
           setError(
-            'Authentication system not configured. Please contact the administrator or check your setup.'
+            'Authentication system not configured. Please check SUPABASE_SETUP.md for setup instructions.'
           );
         } else {
           setError(error.message);
@@ -59,38 +59,48 @@ export const SignUpPage: React.FC = () => {
               </svg>
             </div>
             <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-              Authentication Not Available
+              Setup Required
             </h2>
-            <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-amber-600">⚠️</span>
-                <h3 className="font-medium text-amber-800">Setup Required</h3>
+                <span className="text-blue-600">🔧</span>
+                <h3 className="font-medium text-blue-800">
+                  Supabase Configuration Needed
+                </h3>
               </div>
-              <p className="text-amber-700 text-sm mb-3">
-                User registration requires Supabase to be configured. The
-                authentication system is currently not available.
+              <p className="text-blue-700 text-sm mb-3">
+                To enable user accounts and favorites, you need to configure
+                Supabase.
               </p>
               <div className="bg-white rounded p-3 text-sm">
-                <p className="text-gray-600 mb-2">
-                  To enable user accounts, you need to:
-                </p>
+                <p className="text-gray-600 mb-2">Quick setup steps:</p>
                 <ol className="text-gray-700 text-xs space-y-1 list-decimal list-inside">
-                  <li>Set up a Supabase project</li>
-                  <li>Configure environment variables</li>
-                  <li>Apply the database schema</li>
+                  <li>Create a Supabase project at supabase.com</li>
+                  <li>Add environment variables to .env file</li>
+                  <li>Run the database schema</li>
+                  <li>Restart your development server</li>
                 </ol>
               </div>
-              <p className="text-xs text-amber-600 mt-3">
-                Check the README.md file for setup instructions.
-              </p>
+              <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                <p className="text-yellow-800">
+                  📖 <strong>Detailed instructions:</strong> Check the{' '}
+                  <code className="bg-yellow-100 px-1 rounded">
+                    SUPABASE_SETUP.md
+                  </code>{' '}
+                  file in your project root.
+                </p>
+              </div>
             </div>
-            <div className="mt-6">
+            <div className="mt-6 space-y-3">
               <Link
                 to="/"
-                className="font-medium text-primary hover:text-primary-hover"
+                className="block font-medium text-primary hover:text-primary-hover"
               >
                 ← Back to Home
               </Link>
+              <p className="text-xs text-gray-500">
+                You can still browse names and search without an account!
+              </p>
             </div>
           </div>
         </div>
