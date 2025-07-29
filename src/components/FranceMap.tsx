@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NameData } from '../services/splitJsonApi';
+import { isConfigured } from '../lib/supabase';
 import {
   getDepartmentData,
   getAvailableYearsForName,
@@ -127,9 +128,9 @@ export default function FranceMap({
     loadGeoData();
   }, []);
 
-  // Load available years when nameData changes
+  // Load available years when nameData changes (only if Supabase is configured)
   useEffect(() => {
-    if (nameData?.name && nameData?.sex) {
+    if (isConfigured && nameData?.name && nameData?.sex) {
       const loadAvailableYears = async () => {
         try {
           const years = await getAvailableYearsForName(
@@ -149,12 +150,20 @@ export default function FranceMap({
       };
 
       loadAvailableYears();
+    } else {
+      // Use years from nameData if Supabase is not configured
+      if (nameData?.yearlyData) {
+        const years = Object.keys(nameData.yearlyData)
+          .map((year) => parseInt(year))
+          .sort((a, b) => b - a);
+        setAvailableYears(years);
+      }
     }
   }, [nameData, selectedYear, onYearChange]);
 
-  // Load department data for the selected year
+  // Load department data for the selected year (only if Supabase is configured)
   useEffect(() => {
-    if (nameData?.name && nameData?.sex && selectedYear) {
+    if (isConfigured && nameData?.name && nameData?.sex && selectedYear) {
       const loadDepartmentData = async () => {
         setLoading(true);
         setError(null);
@@ -176,6 +185,10 @@ export default function FranceMap({
       };
 
       loadDepartmentData();
+    } else {
+      // Clear department data if Supabase is not configured
+      setDepartmentData({});
+      setLoading(false);
     }
   }, [nameData, selectedYear]);
 
@@ -188,6 +201,50 @@ export default function FranceMap({
         <p className="text-gray-500">
           Sélectionnez un prénom pour voir sa répartition géographique
         </p>
+      </div>
+    );
+  }
+
+  // Show configuration message if Supabase is not set up
+  if (!isConfigured) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h3 className="text-lg font-semibold mb-4">
+          Répartition par département
+        </h3>
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-amber-600">🗺️</span>
+            <h4 className="font-medium text-amber-800">
+              Carte régionale non disponible
+            </h4>
+          </div>
+          <p className="text-amber-700 text-sm mb-3">
+            La carte des répartitions départementales nécessite une base de
+            données Supabase configurée.
+          </p>
+          <div className="bg-white rounded p-3 text-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-medium text-gray-700">
+                Données nationales disponibles:
+              </span>
+              <span className="text-gray-600">{selectedYear}</span>
+            </div>
+            <div className="text-lg font-bold text-blue-600">
+              {(
+                nameData.yearlyData[selectedYear.toString()] || 0
+              ).toLocaleString()}{' '}
+              naissances
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Total France pour le prénom "{nameData.name}"
+            </p>
+          </div>
+          <p className="text-xs text-amber-600 mt-3">
+            Pour activer cette fonctionnalité, configurez Supabase avec les
+            données départementales.
+          </p>
+        </div>
       </div>
     );
   }

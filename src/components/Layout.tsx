@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  Bars3Icon,
+  XMarkIcon,
+  UserIcon,
+  ArrowRightOnRectangleIcon,
+} from '@heroicons/react/24/outline';
+import { useAuth } from '../hooks/useAuth';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -8,6 +14,8 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, signOut, loading } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -15,6 +23,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+    closeMobileMenu();
   };
 
   // Prevent body scroll when mobile menu is open
@@ -52,7 +66,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex items-center space-x-8">
               <Link
                 to="/"
                 className="text-gray-700 hover:text-primary font-medium transition-colors"
@@ -71,18 +85,64 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 AI Recommendations
               </Link>
-              <Link
-                to="/favorites"
-                className="text-gray-700 hover:text-primary font-medium transition-colors"
-              >
-                Favorites
-              </Link>
-              <Link
-                to="/profile"
-                className="text-gray-700 hover:text-primary font-medium transition-colors"
-              >
-                Profile
-              </Link>
+
+              {/* Authenticated Links */}
+              {user && (
+                <>
+                  <Link
+                    to="/favorites"
+                    className="text-gray-700 hover:text-primary font-medium transition-colors"
+                  >
+                    Favorites
+                  </Link>
+                  <Link
+                    to="/profile"
+                    className="text-gray-700 hover:text-primary font-medium transition-colors"
+                  >
+                    Profile
+                  </Link>
+                </>
+              )}
+
+              {/* Auth Buttons */}
+              <div className="flex items-center space-x-4">
+                {!loading && (
+                  <>
+                    {user ? (
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2">
+                          <UserIcon className="w-4 h-4 text-gray-600" />
+                          <span className="text-sm text-gray-700">
+                            {user.user_metadata?.full_name || user.email}
+                          </span>
+                        </div>
+                        <button
+                          onClick={handleSignOut}
+                          className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors"
+                        >
+                          <ArrowRightOnRectangleIcon className="w-4 h-4" />
+                          <span className="text-sm">Sign Out</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-3">
+                        <Link
+                          to="/login"
+                          className="text-gray-700 hover:text-primary font-medium transition-colors"
+                        >
+                          Login
+                        </Link>
+                        <Link
+                          to="/signup"
+                          className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+                        >
+                          Sign Up
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </nav>
 
             {/* Mobile Burger Menu Button */}
@@ -138,20 +198,63 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             >
               🤖 AI Recommendations
             </Link>
-            <Link
-              to="/favorites"
-              className="block py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-primary font-medium transition-colors"
-              onClick={closeMobileMenu}
-            >
-              ❤️ Favorites
-            </Link>
-            <Link
-              to="/profile"
-              className="block py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-primary font-medium transition-colors"
-              onClick={closeMobileMenu}
-            >
-              👤 Profile
-            </Link>
+
+            {/* Authenticated Mobile Links */}
+            {user && (
+              <>
+                <Link
+                  to="/favorites"
+                  className="block py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-primary font-medium transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  ❤️ Favorites
+                </Link>
+                <Link
+                  to="/profile"
+                  className="block py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-primary font-medium transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  👤 Profile
+                </Link>
+              </>
+            )}
+
+            {/* Mobile Auth Section */}
+            {!loading && (
+              <div className="border-t border-gray-200 pt-4">
+                {user ? (
+                  <div className="space-y-3">
+                    <div className="px-4 py-2 text-sm text-gray-600">
+                      Signed in as {user.user_metadata?.full_name || user.email}
+                    </div>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center space-x-2 w-full py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Link
+                      to="/login"
+                      className="block py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-primary font-medium transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      🔑 Login
+                    </Link>
+                    <Link
+                      to="/signup"
+                      className="block py-3 px-4 rounded-lg bg-primary text-white hover:bg-primary-600 font-medium transition-colors text-center"
+                      onClick={closeMobileMenu}
+                    >
+                      ✨ Sign Up
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
           </nav>
         </div>
       </header>

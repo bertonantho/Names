@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeftIcon,
   HeartIcon,
@@ -15,6 +15,7 @@ import {
   findNamesWithSimilarCharacteristics,
 } from '../services/splitJsonApi';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { NameInteractionButtons } from '../components/NameInteractionButtons';
 import FranceMap from '../components/FranceMap';
 
 // Simple line chart component
@@ -107,64 +108,47 @@ const TrendChart: React.FC<{ data: NameData; color: string }> = ({
               stroke="white"
               strokeWidth="2"
             />
-            {/* Show values for every 10th point or significant peaks */}
-            {(index % Math.max(1, Math.floor(points.length / 10)) === 0 ||
-              point.value === maxValue) && (
-              <g>
-                <text
-                  x={point.x}
-                  y={point.y - 10}
-                  textAnchor="middle"
-                  fontSize="12"
-                  fill="#374151"
-                  fontWeight="500"
-                >
-                  {point.value}
-                </text>
-                <text
-                  x={point.x}
-                  y={height - padding + 20}
-                  textAnchor="middle"
-                  fontSize="10"
-                  fill="#6b7280"
-                >
-                  {point.year}
-                </text>
-              </g>
-            )}
+            {/* Hover tooltip */}
+            <title>{`${point.year}: ${point.value.toLocaleString()} births`}</title>
           </g>
         ))}
 
-        {/* Y-axis labels */}
+        {/* Axis labels */}
         <text
-          x="10"
+          x={padding}
+          y={height - 10}
+          fontSize="12"
+          fill="#6b7280"
+          textAnchor="start"
+        >
+          {years[0]}
+        </text>
+        <text
+          x={width - padding}
+          y={height - 10}
+          fontSize="12"
+          fill="#6b7280"
+          textAnchor="end"
+        >
+          {years[years.length - 1]}
+        </text>
+        <text
+          x={10}
           y={padding}
           fontSize="12"
           fill="#6b7280"
-          textAnchor="middle"
+          textAnchor="start"
         >
-          {maxValue}
+          {maxValue.toLocaleString()}
         </text>
         <text
-          x="10"
-          y={height - padding}
+          x={10}
+          y={height - padding + 5}
           fontSize="12"
           fill="#6b7280"
-          textAnchor="middle"
+          textAnchor="start"
         >
-          {minValue}
-        </text>
-
-        {/* Title */}
-        <text
-          x={width / 2}
-          y="20"
-          fontSize="14"
-          fill="#374151"
-          textAnchor="middle"
-          fontWeight="600"
-        >
-          Popularity Trend Over Time
+          {minValue.toLocaleString()}
         </text>
       </svg>
     </div>
@@ -173,6 +157,7 @@ const TrendChart: React.FC<{ data: NameData; color: string }> = ({
 
 export const NameDetailsPage: React.FC = () => {
   const { name } = useParams<{ name: string }>();
+  const navigate = useNavigate();
   const [nameData, setNameData] = useState<NameData[]>([]);
   const [similarNames, setSimilarNames] = useState<NameData[]>([]);
   const [similarCharacteristics, setSimilarCharacteristics] = useState<
@@ -284,6 +269,10 @@ export const NameDetailsPage: React.FC = () => {
     return peak;
   };
 
+  const handleAuthRequired = () => {
+    navigate('/login', { state: { from: { pathname: `/name/${name}` } } });
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -297,10 +286,15 @@ export const NameDetailsPage: React.FC = () => {
           </Link>
           <h1 className="text-4xl font-bold text-gray-900">{name}</h1>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-          <HeartIcon className="w-5 h-5" />
-          Save to Favorites
-        </button>
+        {nameData.length > 0 && (
+          <NameInteractionButtons
+            nameText={nameData[0].name}
+            nameGender={nameData[0].sex}
+            size="large"
+            showLabels={true}
+            onAuthRequired={handleAuthRequired}
+          />
+        )}
       </div>
 
       {/* Name Variants */}
@@ -323,75 +317,86 @@ export const NameDetailsPage: React.FC = () => {
                   {data.name}
                 </h2>
                 <p className="text-lg text-gray-600">
-                  {data.sex === 'M' ? 'Boy Name' : 'Girl Name'}
+                  {data.sex === 'M' ? 'Masculine' : 'Feminine'} name
                 </p>
+                <div className="flex items-center gap-4 mt-2">
+                  <span className="text-sm text-gray-500">
+                    Total births: {getTotalBirths(data).toLocaleString()}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    Period: {data.firstYear} - {data.lastYear}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Statistics */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-900">
-                  {(
-                    data.yearlyData['2024'] ||
-                    data.yearlyData['2023'] ||
-                    0
-                  ).toLocaleString()}
+            {/* Statistics Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <CalendarIcon className="w-5 h-5 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-900">
+                    {selectedYear} Births
+                  </span>
                 </div>
-                <div className="text-sm text-gray-600">2024 Births</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {(data.yearlyData[selectedYear] || 0).toLocaleString()}
+                </div>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-900">
+
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <ArrowTrendingUpIcon className="w-5 h-5 text-green-600" />
+                  <span className="text-sm font-medium text-green-900">
+                    Peak Year
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-green-600">
+                  {getPeakYear(data).year}
+                </div>
+                <div className="text-sm text-green-600">
+                  {getPeakYear(data).count.toLocaleString()} births
+                </div>
+              </div>
+
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <UserGroupIcon className="w-5 h-5 text-purple-600" />
+                  <span className="text-sm font-medium text-purple-900">
+                    Total Births
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-purple-600">
                   {getTotalBirths(data).toLocaleString()}
                 </div>
-                <div className="text-sm text-gray-600">Total Historic</div>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-900">
-                  {getPeakYear(data).count.toLocaleString()}
+
+              <div className="bg-amber-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <ArrowTrendingUpIcon className="w-5 h-5 text-amber-600" />
+                  <span className="text-sm font-medium text-amber-900">
+                    5-Year Trend
+                  </span>
                 </div>
-                <div className="text-sm text-gray-600">
-                  Peak Year ({getPeakYear(data).year})
+                <div
+                  className={`text-2xl font-bold ${
+                    getYearlyTrend(data).trend > 0
+                      ? 'text-green-600'
+                      : getYearlyTrend(data).trend < 0
+                        ? 'text-red-600'
+                        : 'text-gray-600'
+                  }`}
+                >
+                  {getYearlyTrend(data).trend > 0 ? '+' : ''}
+                  {getYearlyTrend(data).trend}
                 </div>
               </div>
             </div>
 
-            {/* Details */}
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center gap-3">
-                <CalendarIcon className="w-5 h-5 text-gray-400" />
-                <span className="text-gray-700">
-                  Active from {data.firstYear} to {data.lastYear}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <ArrowTrendingUpIcon className="w-5 h-5 text-gray-400" />
-                <span className="text-gray-700">
-                  Peak year: {getPeakYear(data).year} (
-                  {getPeakYear(data).count.toLocaleString()} births)
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <UserGroupIcon className="w-5 h-5 text-gray-400" />
-                <span className="text-gray-700">
-                  {(() => {
-                    const { trend } = getYearlyTrend(data);
-                    return trend > 0
-                      ? 'Trending up'
-                      : trend < 0
-                        ? 'Trending down'
-                        : 'Stable';
-                  })()}
-                </span>
-              </div>
-            </div>
-
-            {/* Historical Trend Chart */}
+            {/* Trend Chart */}
             <div className="mb-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Historical Popularity Trend
+                Birth Trend Over Time
               </h3>
               <TrendChart
                 data={data}
@@ -399,54 +404,38 @@ export const NameDetailsPage: React.FC = () => {
               />
             </div>
 
-            {/* France Map */}
-            <div className="mb-8">
-              <FranceMap
-                nameData={data}
-                selectedYear={selectedYear}
-                onYearChange={setSelectedYear}
-              />
+            {/* Year Selector */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Year for Detailed View
+              </label>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                {Object.keys(data.yearlyData)
+                  .sort((a, b) => parseInt(b) - parseInt(a))
+                  .map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+              </select>
             </div>
 
-            {/* Recent Years Chart */}
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                Recent Years Detail
+            {/* Regional Map */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Regional Distribution in {selectedYear}
               </h3>
-              <div className="space-y-2">
-                {Object.entries(data.yearlyData)
-                  .sort(([a], [b]) => parseInt(b) - parseInt(a))
-                  .slice(0, 5)
-                  .map(([year, count]) => (
-                    <div
-                      key={year}
-                      className="flex items-center justify-between"
-                    >
-                      <span className="text-gray-600">{year}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-32 bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${
-                              data.sex === 'M' ? 'bg-blue-600' : 'bg-pink-600'
-                            }`}
-                            style={{
-                              width: `${Math.min(100, (count / Math.max(...Object.values(data.yearlyData))) * 100)}%`,
-                            }}
-                          />
-                        </div>
-                        <span className="text-sm font-medium text-gray-900 w-12 text-right">
-                          {count.toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-              </div>
+              <FranceMap nameData={data} selectedYear={selectedYear} />
             </div>
           </div>
         ))}
       </div>
 
-      {/* Similar Names */}
+      {/* Similar Names Section */}
       {similarNames.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">
@@ -484,14 +473,14 @@ export const NameDetailsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Names with Similar Characteristics */}
+      {/* Similar Characteristics Section */}
       {similarCharacteristics.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            Names with Similar Style
+            Names with Similar Characteristics
           </h3>
           <p className="text-sm text-gray-600 mb-4">
-            Names with similar length, syllables, and contemporary appeal
+            Names that share similar patterns in popularity, timing, and usage
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {similarCharacteristics.map((characteristicName) => (

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { HomePage } from './pages/HomePage';
 import { SearchPage } from './pages/SearchPage';
 import { NameDetailsPage } from './pages/NameDetailsPage';
@@ -10,12 +11,16 @@ import { AIRecommendationsPage } from './pages/AIRecommendationsPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 import { CollectionsPage } from './pages/CollectionsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { LoginPage } from './pages/LoginPage';
+import { SignUpPage } from './pages/SignUpPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import './index.css';
 
 function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Routes>
+        {/* Public Routes */}
         <Route
           path="/"
           element={
@@ -48,11 +53,41 @@ function App() {
             </Layout>
           }
         />
+
+        {/* Authentication Routes */}
+        <Route
+          path="/login"
+          element={
+            <Layout>
+              <LoginPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <Layout>
+              <SignUpPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <Layout>
+              <ResetPasswordPage />
+            </Layout>
+          }
+        />
+
+        {/* Protected Routes */}
         <Route
           path="/favorites"
           element={
             <Layout>
-              <FavoritesPage />
+              <ProtectedRoute>
+                <FavoritesPage />
+              </ProtectedRoute>
             </Layout>
           }
         />
@@ -60,7 +95,9 @@ function App() {
           path="/collections"
           element={
             <Layout>
-              <CollectionsPage />
+              <ProtectedRoute>
+                <CollectionsPage />
+              </ProtectedRoute>
             </Layout>
           }
         />
@@ -68,7 +105,9 @@ function App() {
           path="/profile"
           element={
             <Layout>
-              <ProfilePage />
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
             </Layout>
           }
         />
