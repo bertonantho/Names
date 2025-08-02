@@ -100,6 +100,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Drop existing triggers if they exist
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
+DROP TRIGGER IF EXISTS update_collections_updated_at ON collections;
+DROP TRIGGER IF EXISTS add_collection_creator_as_member_trigger ON collections;
+DROP TRIGGER IF EXISTS prevent_favorite_dislike_conflict_favorites ON favorites;
+DROP TRIGGER IF EXISTS prevent_favorite_dislike_conflict_dislikes ON dislikes;
 -- Create triggers for updated_at
 CREATE TRIGGER update_profiles_updated_at
     BEFORE UPDATE ON profiles
@@ -119,6 +125,9 @@ ALTER TABLE collection_invitations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE dislikes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
 -- Profiles policies
 CREATE POLICY "Users can view their own profile" ON profiles
     FOR SELECT USING (auth.uid() = id);
@@ -128,6 +137,11 @@ CREATE POLICY "Users can update their own profile" ON profiles
 
 CREATE POLICY "Users can insert their own profile" ON profiles
     FOR INSERT WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can view collections they have access to" ON collections;
+DROP POLICY IF EXISTS "Users can insert their own collections" ON collections;
+DROP POLICY IF EXISTS "Collection owners can update their collections" ON collections;
+DROP POLICY IF EXISTS "Collection owners can delete their collections" ON collections;
 
 -- Collections policies
 CREATE POLICY "Users can view collections they have access to" ON collections
@@ -149,6 +163,9 @@ CREATE POLICY "Collection owners can update their collections" ON collections
 CREATE POLICY "Collection owners can delete their collections" ON collections
     FOR DELETE USING (auth.uid() = created_by);
 
+-- Drop existing collection members policies if they exist
+DROP POLICY IF EXISTS "Users can view collection memberships they're part of" ON collection_members;
+DROP POLICY IF EXISTS "Collection owners can manage memberships" ON collection_members;
 -- Collection members policies
 CREATE POLICY "Users can view collection memberships they're part of" ON collection_members
     FOR SELECT USING (
@@ -167,6 +184,9 @@ CREATE POLICY "Collection owners can manage memberships" ON collection_members
         )
     );
 
+DROP POLICY IF EXISTS "Users can view invitations for their collections" ON collection_invitations;
+DROP POLICY IF EXISTS "Users can create invitations for their collections" ON collection_invitations;
+DROP POLICY IF EXISTS "Users can update invitations for their collections" ON collection_invitations;
 -- Collection invitations policies
 CREATE POLICY "Users can view invitations for their collections" ON collection_invitations
     FOR SELECT USING (
@@ -196,6 +216,12 @@ CREATE POLICY "Users can update invitations for their collections" ON collection
         )
     );
 
+DROP POLICY IF EXISTS "Users can view favorites they have access to" ON favorites;
+DROP POLICY IF EXISTS "Users can view their own favorites" ON favorites;
+DROP POLICY IF EXISTS "Users can view favorites in collections they have access to" ON favorites;
+DROP POLICY IF EXISTS "Users can insert their own favorites" ON favorites;
+DROP POLICY IF EXISTS "Users can update their own favorites" ON favorites;
+DROP POLICY IF EXISTS "Users can delete their own favorites" ON favorites;
 -- Favorites policies
 CREATE POLICY "Users can view favorites they have access to" ON favorites
     FOR SELECT USING (
@@ -215,6 +241,11 @@ CREATE POLICY "Users can update their own favorites" ON favorites
 CREATE POLICY "Users can delete their own favorites" ON favorites
     FOR DELETE USING (auth.uid() = user_id);
 
+
+DROP POLICY IF EXISTS "Users can view their own dislikes" ON dislikes;
+DROP POLICY IF EXISTS "Users can insert their own dislikes" ON dislikes;
+DROP POLICY IF EXISTS "Users can update their own dislikes" ON dislikes;
+DROP POLICY IF EXISTS "Users can delete their own dislikes" ON dislikes;
 -- Dislikes policies (unchanged)
 CREATE POLICY "Users can view their own dislikes" ON dislikes
     FOR SELECT USING (auth.uid() = user_id);
