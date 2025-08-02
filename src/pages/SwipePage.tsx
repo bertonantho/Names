@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  PanInfo,
+  animate,
+} from 'framer-motion';
 import {
   AdjustmentsHorizontalIcon,
   ArrowLeftIcon,
@@ -10,6 +16,7 @@ import { NameData, countLetters } from '../services/namesApi';
 import { getSummary } from '../services/splitJsonApi';
 import { useFavorites } from '../hooks/useFavorites';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { nameCache } from '../services/nameCache';
 
 interface SwipeFilters {
   gender: 'M' | 'F' | 'all';
@@ -21,6 +28,7 @@ export const SwipePage: React.FC = () => {
   const [names, setNames] = useState<NameData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<SwipeFilters>({
     gender: 'all',
@@ -38,98 +46,91 @@ export const SwipePage: React.FC = () => {
   } = useFavorites();
 
   const x = useMotionValue(0);
+  const y = useMotionValue(0);
   const rotate = useTransform(x, [-300, 300], [-30, 30]);
-  const opacity = useTransform(
-    x,
-    [-300, -200, 0, 200, 300],
-    [0, 0.5, 1, 0.5, 0]
-  );
+  const scale = useTransform(x, [-300, 0, 300], [0.8, 1, 0.8]);
 
   // Color overlays for swipe feedback
-  const likeOpacity = useTransform(x, [0, 150], [0, 1]);
-  const dislikeOpacity = useTransform(x, [-150, 0], [1, 0]);
+  const likeOpacity = useTransform(x, [0, 100, 200], [0, 0.3, 0.8]);
+  const dislikeOpacity = useTransform(x, [-200, -100, 0], [0.8, 0.3, 0]);
+  const likeScale = useTransform(x, [0, 150], [0.5, 1.2]);
+  const dislikeScale = useTransform(x, [-150, 0], [1.2, 0.5]);
 
   const loadNames = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getSummary();
+      // Create excluded names set from current favorites and dislikes
+      const excludedNames = nameCache.createExcludedSet(favorites, dislikes);
 
-      // Load all names from chunks
-      const allNames: NameData[] = [];
+      // Check cache first
+      const cachedNames = nameCache.getCachedNames(filters);
+      if (cachedNames) {
+        const filteredNames = cachedNames.filter(
+          (name) => !excludedNames.has(`${name.name}-${name.sex}`)
+        );
 
-      // Load boys data if needed
-      if (filters.gender === 'M' || filters.gender === 'all') {
-        for (let i = 0; i < 25; i++) {
-          try {
-            const response = await fetch(`/data/boys_chunk_${i}.json`);
-            if (response.ok) {
-              const chunk: NameData[] = await response.json();
-              allNames.push(...chunk);
-            } else {
-              break; // No more chunks
-            }
-          } catch {
-            break; // No more chunks
-          }
-        }
+        setNames(filteredNames);
+        setCurrentIndex(0);
+        return;
       }
 
-      // Load girls data if needed
-      if (filters.gender === 'F' || filters.gender === 'all') {
-        for (let i = 0; i < 25; i++) {
-          try {
-            const response = await fetch(`/data/girls_chunk_${i}.json`);
-            if (response.ok) {
-              const chunk: NameData[] = await response.json();
-              allNames.push(...chunk);
-            } else {
-              break; // No more chunks
-            }
-          } catch {
-            break; // No more chunks
-          }
-        }
-      }
-
-      // Filter names based on criteria
-      let filteredNames = allNames.filter((name) => {
-        // Gender filter
-        const genderMatch =
-          filters.gender === 'all' || name.sex === filters.gender;
-
-        // Letter count filter
-        const letterCount = countLetters(name.name);
-        const letterMatch =
-          letterCount >= filters.minLetters &&
-          letterCount <= filters.maxLetters;
-
-        // Recent usage (has data for recent years)
-        const hasRecentUsage =
-          (name.yearlyData['2024'] || 0) > 0 ||
-          (name.yearlyData['2023'] || 0) > 0;
-
-        // Exclude already rated names
-        const notRated =
-          !isFavorited(name.name, name.sex) && !isDisliked(name.name, name.sex);
-
-        return genderMatch && letterMatch && hasRecentUsage && notRated;
-      });
-
-      // Shuffle the array to get random order
-      filteredNames = filteredNames.sort(() => Math.random() - 0.5);
+      // Load names progressively with caching
+      const filteredNames = await nameCache.loadNamesProgressively(
+        filters,
+        excludedNames,
+        300 // Target count - load enough for a good session
+      );
 
       setNames(filteredNames);
       setCurrentIndex(0);
+
+      // Log cache stats for debugging
+      const stats = nameCache.getCacheStats();
+      console.log('Cache stats:', stats);
     } catch (error) {
       console.error('Error loading names:', error);
     } finally {
       setLoading(false);
     }
-  }, [filters, isFavorited, isDisliked]);
+  }, [filters, favorites, dislikes, isFavorited, isDisliked]);
+
+  // Load more names when running low
+  const loadMoreNames = useCallback(async () => {
+    if (loadingMore || currentIndex < names.length - 10) return;
+
+    setLoadingMore(true);
+    try {
+      const excludedNames = nameCache.createExcludedSet(favorites, dislikes);
+      const additionalNames = await nameCache.loadNamesProgressively(
+        filters,
+        excludedNames,
+        100 // Load 100 more names
+      );
+
+      // Filter out names we already have
+      const existingNameSet = new Set(names.map((n) => `${n.name}-${n.sex}`));
+      const newNames = additionalNames.filter(
+        (name) => !existingNameSet.has(`${name.name}-${name.sex}`)
+      );
+
+      setNames((prev) => [...prev, ...newNames]);
+    } catch (error) {
+      console.error('Error loading more names:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, currentIndex, names.length, favorites, dislikes, filters]);
 
   useEffect(() => {
     loadNames();
   }, [loadNames]);
+
+  // Auto-load more names when getting close to the end
+  useEffect(() => {
+    if (currentIndex >= names.length - 20) {
+      loadMoreNames();
+    }
+  }, [currentIndex, names.length, loadMoreNames]);
 
   const handleSwipe = useCallback(
     async (direction: 'left' | 'right') => {
@@ -138,50 +139,78 @@ export const SwipePage: React.FC = () => {
       const currentName = names[currentIndex];
 
       try {
-        // Animate the card out with spring animation
-        if (direction === 'right') {
-          x.set(400);
-        } else {
-          x.set(-400);
-        }
+        // Save to database immediately (don't block animation)
+        const savePromise =
+          direction === 'right'
+            ? addFavorite(currentName.name, currentName.sex)
+            : addDislike(currentName.name, currentName.sex, 'Swiped left');
 
-        // Save to database
-        if (direction === 'right') {
-          await addFavorite(currentName.name, currentName.sex);
-        } else {
-          await addDislike(currentName.name, currentName.sex, 'Swiped left');
-        }
+        // Animate card out smoothly
+        const exitX = direction === 'right' ? 500 : -500;
+        const exitY = (Math.random() - 0.5) * 200; // Random slight rotation
 
-        // Wait for animation to complete, then show next card
-        setTimeout(() => {
-          setCurrentIndex((prev) => {
-            const newIndex = prev + 1;
-            console.log('Moving to next card:', newIndex, 'of', names.length);
-            return newIndex;
-          });
-          x.set(0);
-        }, 300);
+        // Use animate for smooth transition
+        const animateOut = async () => {
+          x.set(exitX);
+          y.set(exitY);
+          // Wait for the animation to complete
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        };
+
+        await animateOut();
+
+        // Move to next card
+        setCurrentIndex((prev) => {
+          const newIndex = prev + 1;
+          console.log('Moving to next card:', newIndex, 'of', names.length);
+          return newIndex;
+        });
+
+        // Reset position for next card (immediate, will be overridden by key change)
+        x.set(0);
+        y.set(0);
+
+        // Await database save
+        await savePromise;
       } catch (error) {
         console.error('Error updating name status:', error);
-        // Reset position on error
-        x.set(0);
+        // Smoothly reset position on error
+        animate(x, 0, { type: 'spring', stiffness: 400, damping: 40 });
+        animate(y, 0, { type: 'spring', stiffness: 400, damping: 40 });
       }
     },
-    [currentIndex, names, addFavorite, addDislike, x]
+    [currentIndex, names, addFavorite, addDislike, x, y]
   );
 
   const handleDragEnd = (event: any, info: PanInfo) => {
-    const threshold = 100;
+    const threshold = 75; // Lower threshold for easier swiping
+    const velocityThreshold = 300; // Lower velocity threshold
+    const offset = info.offset.x;
     const velocity = info.velocity.x;
 
-    // Consider both offset and velocity for more responsive swiping
-    if (info.offset.x > threshold || velocity > 500) {
+    // More sensitive swipe detection
+    const shouldSwipeRight = offset > threshold || velocity > velocityThreshold;
+    const shouldSwipeLeft =
+      offset < -threshold || velocity < -velocityThreshold;
+
+    if (shouldSwipeRight) {
       handleSwipe('right');
-    } else if (info.offset.x < -threshold || velocity < -500) {
+    } else if (shouldSwipeLeft) {
       handleSwipe('left');
     } else {
-      // Animate back to center with spring
-      x.set(0);
+      // Smooth spring back to center
+      animate(x, 0, {
+        type: 'spring',
+        stiffness: 500,
+        damping: 30,
+        mass: 0.8,
+      });
+      animate(y, 0, {
+        type: 'spring',
+        stiffness: 500,
+        damping: 30,
+        mass: 0.8,
+      });
     }
   };
 
@@ -323,35 +352,48 @@ export const SwipePage: React.FC = () => {
               {/* Current Card */}
               <motion.div
                 key={currentIndex}
-                style={{ x, rotate, opacity }}
-                drag="x"
-                dragConstraints={{ left: -300, right: 300 }}
-                dragElastic={0.2}
+                style={{ x, y, rotate, scale }}
+                drag
+                dragConstraints={{
+                  left: -200,
+                  right: 200,
+                  top: -100,
+                  bottom: 100,
+                }}
+                dragElastic={0.1}
+                dragMomentum={false}
                 onDragEnd={handleDragEnd}
-                className="bg-white rounded-3xl shadow-2xl p-8 text-center cursor-grab active:cursor-grabbing relative overflow-hidden"
-                whileTap={{ scale: 1.05 }}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+                className="bg-white rounded-3xl shadow-2xl p-8 text-center cursor-grab active:cursor-grabbing relative overflow-hidden select-none"
+                whileTap={{ scale: 1.02 }}
+                whileDrag={{ scale: 1.05, zIndex: 50 }}
+                initial={{ scale: 0.9, opacity: 0, y: 50 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0 }}
                 transition={{
                   type: 'spring',
-                  stiffness: 300,
-                  damping: 20,
+                  stiffness: 400,
+                  damping: 25,
+                  mass: 0.8,
                 }}
               >
                 {/* Like Overlay */}
                 <motion.div
                   style={{ opacity: likeOpacity }}
-                  className="absolute inset-0 bg-green-500/20 flex items-center justify-center pointer-events-none"
+                  className="absolute inset-0 bg-green-500/20 flex items-center justify-center pointer-events-none rounded-3xl"
                 >
-                  <HeartIcon className="h-20 w-20 text-green-500" />
+                  <motion.div style={{ scale: likeScale }}>
+                    <HeartIcon className="h-16 w-16 text-green-500 drop-shadow-lg" />
+                  </motion.div>
                 </motion.div>
 
                 {/* Dislike Overlay */}
                 <motion.div
                   style={{ opacity: dislikeOpacity }}
-                  className="absolute inset-0 bg-red-500/20 flex items-center justify-center pointer-events-none"
+                  className="absolute inset-0 bg-red-500/20 flex items-center justify-center pointer-events-none rounded-3xl"
                 >
-                  <XMarkIcon className="h-20 w-20 text-red-500" />
+                  <motion.div style={{ scale: dislikeScale }}>
+                    <XMarkIcon className="h-16 w-16 text-red-500 drop-shadow-lg" />
+                  </motion.div>
                 </motion.div>
                 <div className="mb-6">
                   <h2 className="text-4xl font-bold text-gray-800 mb-2">
@@ -442,6 +484,7 @@ export const SwipePage: React.FC = () => {
         <div className="text-center mt-4">
           <p className="text-white/80 text-sm">
             {currentIndex + 1} of {names.length} names
+            {loadingMore && ' • Loading more...'}
           </p>
         </div>
       )}
