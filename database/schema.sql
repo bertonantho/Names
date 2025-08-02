@@ -136,7 +136,7 @@ CREATE POLICY "Users can view collections they have access to" ON collections
         created_by = auth.uid() OR
         EXISTS (
             SELECT 1 FROM collection_members 
-            WHERE collection_id = id AND user_id = auth.uid()
+            WHERE collection_id = collections.id AND user_id = auth.uid()
         )
     );
 
@@ -197,10 +197,7 @@ CREATE POLICY "Users can update invitations for their collections" ON collection
     );
 
 -- Favorites policies
-CREATE POLICY "Users can view their own favorites" ON favorites
-    FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can view favorites in collections they have access to" ON favorites
+CREATE POLICY "Users can view favorites they have access to" ON favorites
     FOR SELECT USING (
         auth.uid() = user_id OR
         (collection_id IS NOT NULL AND EXISTS (
@@ -238,10 +235,16 @@ BEGIN
     INSERT INTO profiles (id, email, full_name)
     VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'full_name');
     RETURN NEW;
+EXCEPTION
+    WHEN others THEN
+        RAISE LOG 'Error creating profile for user %: %', NEW.id, SQLERRM;
+        RETURN NEW; -- Continue with auth creation even if profile fails
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+
 -- Trigger for new user registration
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW
