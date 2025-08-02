@@ -14,6 +14,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { SwipePage } from './pages/SwipePage';
 import './index.css';
 
 function App() {
@@ -50,6 +51,14 @@ function App() {
           element={
             <Layout>
               <AIRecommendationsPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/swipe"
+          element={
+            <Layout>
+              <SwipePage />
             </Layout>
           }
         />

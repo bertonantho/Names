@@ -10,18 +10,26 @@ let isConfigured = false;
 
 if (supabaseUrl && supabaseAnonKey) {
   try {
+    console.log(
+      'Initializing Supabase client with URL:',
+      supabaseUrl.substring(0, 30) + '...'
+    );
     supabase = createClient(supabaseUrl, supabaseAnonKey);
     isConfigured = true;
+    console.log('Supabase client initialized successfully');
   } catch (error) {
     console.error('Failed to initialize Supabase client:', error);
     isConfigured = false;
+    supabase = null;
   }
 } else {
   console.warn(
-    'Supabase environment variables are not configured. Some features may not work. ' +
-      'Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.'
+    'Supabase environment variables are not configured. Some features may not work.'
   );
+  console.warn('VITE_SUPABASE_URL:', supabaseUrl ? 'set' : 'missing');
+  console.warn('VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'set' : 'missing');
   isConfigured = false;
+  supabase = null;
 }
 
 // Export both the client and configuration status

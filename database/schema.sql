@@ -147,11 +147,7 @@ DROP POLICY IF EXISTS "Collection owners can delete their collections" ON collec
 CREATE POLICY "Users can view collections they have access to" ON collections
     FOR SELECT USING (
         is_public = true OR 
-        created_by = auth.uid() OR
-        EXISTS (
-            SELECT 1 FROM collection_members 
-            WHERE collection_id = collections.id AND user_id = auth.uid()
-        )
+        created_by = auth.uid()
     );
 
 CREATE POLICY "Users can insert their own collections" ON collections
@@ -166,21 +162,21 @@ CREATE POLICY "Collection owners can delete their collections" ON collections
 -- Drop existing collection members policies if they exist
 DROP POLICY IF EXISTS "Users can view collection memberships they're part of" ON collection_members;
 DROP POLICY IF EXISTS "Collection owners can manage memberships" ON collection_members;
--- Collection members policies
+-- Collection members policies  
 CREATE POLICY "Users can view collection memberships they're part of" ON collection_members
     FOR SELECT USING (
         user_id = auth.uid() OR
-        EXISTS (
-            SELECT 1 FROM collections 
-            WHERE id = collection_id AND created_by = auth.uid()
+        collection_id IN (
+            SELECT id FROM collections 
+            WHERE created_by = auth.uid()
         )
     );
 
 CREATE POLICY "Collection owners can manage memberships" ON collection_members
     FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM collections 
-            WHERE id = collection_id AND created_by = auth.uid()
+        collection_id IN (
+            SELECT id FROM collections 
+            WHERE created_by = auth.uid()
         )
     );
 
@@ -191,9 +187,9 @@ DROP POLICY IF EXISTS "Users can update invitations for their collections" ON co
 CREATE POLICY "Users can view invitations for their collections" ON collection_invitations
     FOR SELECT USING (
         invited_by = auth.uid() OR
-        EXISTS (
-            SELECT 1 FROM collections 
-            WHERE id = collection_id AND created_by = auth.uid()
+        collection_id IN (
+            SELECT id FROM collections 
+            WHERE created_by = auth.uid()
         ) OR
         (invited_email = (SELECT email FROM profiles WHERE id = auth.uid()))
     );
@@ -201,18 +197,18 @@ CREATE POLICY "Users can view invitations for their collections" ON collection_i
 CREATE POLICY "Users can create invitations for their collections" ON collection_invitations
     FOR INSERT WITH CHECK (
         auth.uid() = invited_by AND
-        EXISTS (
-            SELECT 1 FROM collections 
-            WHERE id = collection_id AND created_by = auth.uid()
+        collection_id IN (
+            SELECT id FROM collections 
+            WHERE created_by = auth.uid()
         )
     );
 
 CREATE POLICY "Users can update invitations for their collections" ON collection_invitations
     FOR UPDATE USING (
         invited_by = auth.uid() OR
-        EXISTS (
-            SELECT 1 FROM collections 
-            WHERE id = collection_id AND created_by = auth.uid()
+        collection_id IN (
+            SELECT id FROM collections 
+            WHERE created_by = auth.uid()
         )
     );
 

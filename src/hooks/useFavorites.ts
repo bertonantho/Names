@@ -69,7 +69,15 @@ export const useFavorites = (): UseFavoritesReturn => {
 
   // Load favorites and dislikes data
   const loadData = useCallback(async () => {
+    console.log(
+      'loadData called - user:',
+      !!user,
+      'isConfigured:',
+      isConfigured
+    );
+
     if (!user || !isConfigured) {
+      console.log('Skipping data load - user or config missing');
       setFavorites([]);
       setDislikes([]);
       return;
@@ -79,11 +87,18 @@ export const useFavorites = (): UseFavoritesReturn => {
     setError(null);
 
     try {
+      console.log('Starting to fetch favorites and dislikes data...');
       const [favoritesData, dislikesData] = await Promise.all([
         FavoritesService.getFavorites(),
         FavoritesService.getDislikes(),
       ]);
 
+      console.log(
+        'Data fetched successfully - favorites:',
+        favoritesData.length,
+        'dislikes:',
+        dislikesData.length
+      );
       setFavorites(favoritesData);
       setDislikes(dislikesData);
     } catch (err) {
@@ -91,6 +106,7 @@ export const useFavorites = (): UseFavoritesReturn => {
         err instanceof Error ? err.message : 'Failed to load data';
       setError(errorMessage);
       console.error('Error loading favorites/dislikes:', err);
+      console.error('Full error object:', err);
     } finally {
       setLoading(false);
     }

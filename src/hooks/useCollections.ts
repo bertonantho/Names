@@ -55,7 +55,15 @@ export const useCollections = (): UseCollectionsReturn => {
 
   // Load collections
   const loadCollections = useCallback(async () => {
+    console.log(
+      'loadCollections called - user:',
+      !!user,
+      'isConfigured:',
+      isConfigured
+    );
+
     if (!user || !isConfigured) {
+      console.log('Skipping collections load - user or config missing');
       setCollections([]);
       return;
     }
@@ -64,13 +72,20 @@ export const useCollections = (): UseCollectionsReturn => {
     setError(null);
 
     try {
+      console.log('Starting to fetch collections data...');
       const collectionsData = await CollectionsService.getCollections();
+      console.log(
+        'Collections data fetched successfully:',
+        collectionsData.length,
+        'collections'
+      );
       setCollections(collectionsData);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to load collections';
       setError(errorMessage);
       console.error('Error loading collections:', err);
+      console.error('Full error object:', err);
     } finally {
       setLoading(false);
     }

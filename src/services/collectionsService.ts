@@ -9,9 +9,48 @@ import type {
 
 export class CollectionsService {
   private static checkConfig() {
-    if (!isConfigured || !supabase) {
-      throw new Error('Supabase is not configured');
+    if (!isConfigured) {
+      console.error(
+        'Supabase configuration check failed - isConfigured:',
+        isConfigured
+      );
+      throw new Error(
+        'Supabase is not configured. Please check your environment variables.'
+      );
     }
+    if (!supabase) {
+      console.error('Supabase client is null');
+      throw new Error('Supabase client is not initialized.');
+    }
+  }
+
+  // Helper to ensure user profile exists
+  private static async ensureUserProfile(user: any): Promise<void> {
+    // Check if profile exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
+    if (existingProfile) {
+      return; // Profile already exists
+    }
+
+    // Create profile if it doesn't exist
+    console.log('Creating missing profile for user:', user.id);
+    const { error } = await supabase.from('profiles').insert({
+      id: user.id,
+      email: user.email,
+      full_name: user.user_metadata?.full_name || null,
+    });
+
+    if (error) {
+      console.error('Failed to create user profile:', error);
+      throw new Error('Failed to create user profile: ' + error.message);
+    }
+
+    console.log('User profile created successfully');
   }
 
   // Collection CRUD operations
@@ -26,6 +65,9 @@ export class CollectionsService {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
+
+    // Ensure user profile exists
+    await this.ensureUserProfile(user);
 
     const { data: collection, error } = await supabase
       .from('collections')
@@ -43,33 +85,40 @@ export class CollectionsService {
   }
 
   static async getCollections(): Promise<Collection[]> {
+    console.log('getCollections called - checkConfig starting...');
     this.checkConfig();
+    console.log('checkConfig passed');
 
+    console.log('Getting user from supabase.auth...');
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    console.log('User retrieved:', !!user, user?.id?.substring(0, 8) + '...');
     if (!user) throw new Error('User not authenticated');
 
+    console.log('Executing collections query...');
     const { data, error } = await supabase
       .from('collections')
       .select(
         `
         *,
-        creator:profiles!collections_created_by_fkey(id, email, full_name),
-        members:collection_members(count),
-        favorites:favorites(count)
+        creator:profiles!collections_created_by_fkey(id, email, full_name)
       `
       )
-      .or(`created_by.eq.${user.id},collection_members.user_id.eq.${user.id}`)
+      .eq('created_by', user.id)
       .order('updated_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Collections query error:', error);
+      throw error;
+    }
 
-    return (data || []).map((collection: any) => ({
-      ...collection,
-      member_count: collection.members?.[0]?.count || 0,
-      favorite_count: collection.favorites?.[0]?.count || 0,
-    }));
+    console.log(
+      'Collections query successful, got',
+      data?.length || 0,
+      'results'
+    );
+    return data || [];
   }
 
   static async getCollectionDetails(

@@ -85,6 +85,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 AI Recommendations
               </Link>
+              <Link
+                to="/swipe"
+                className="text-gray-700 hover:text-primary font-medium transition-colors"
+              >
+                Discover
+              </Link>
 
               {/* Authenticated Links */}
               {user && (
@@ -197,6 +203,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               onClick={closeMobileMenu}
             >
               🤖 AI Recommendations
+            </Link>
+            <Link
+              to="/swipe"
+              className="block py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-primary font-medium transition-colors"
+              onClick={closeMobileMenu}
+            >
+              💫 Discover
             </Link>
 
             {/* Authenticated Mobile Links */}

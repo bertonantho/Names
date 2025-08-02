@@ -8,8 +8,18 @@ import type {
 
 export class FavoritesService {
   private static checkConfig() {
-    if (!isConfigured || !supabase) {
-      throw new Error('Supabase is not configured');
+    if (!isConfigured) {
+      console.error(
+        'Supabase configuration check failed - isConfigured:',
+        isConfigured
+      );
+      throw new Error(
+        'Supabase is not configured. Please check your environment variables.'
+      );
+    }
+    if (!supabase) {
+      console.error('Supabase client is null');
+      throw new Error('Supabase client is not initialized.');
     }
   }
 
@@ -19,6 +29,35 @@ export class FavoritesService {
     nameGender: string
   ): string {
     return `${nameText}-${nameGender}`;
+  }
+
+  // Helper to ensure user profile exists
+  private static async ensureUserProfile(user: any): Promise<void> {
+    // Check if profile exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
+    if (existingProfile) {
+      return; // Profile already exists
+    }
+
+    // Create profile if it doesn't exist
+    console.log('Creating missing profile for user:', user.id);
+    const { error } = await supabase.from('profiles').insert({
+      id: user.id,
+      email: user.email,
+      full_name: user.user_metadata?.full_name || null,
+    });
+
+    if (error) {
+      console.error('Failed to create user profile:', error);
+      throw new Error('Failed to create user profile: ' + error.message);
+    }
+
+    console.log('User profile created successfully');
   }
 
   // Favorites operations
@@ -34,6 +73,9 @@ export class FavoritesService {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
+
+    // Ensure user profile exists
+    await this.ensureUserProfile(user);
 
     const { data, error } = await supabase
       .from('favorites')
@@ -87,13 +129,18 @@ export class FavoritesService {
   }
 
   static async getFavorites(collectionId?: string): Promise<Favorite[]> {
+    console.log('getFavorites called - checkConfig starting...');
     this.checkConfig();
+    console.log('checkConfig passed');
 
+    console.log('Getting user from supabase.auth...');
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    console.log('User retrieved:', !!user, user?.id?.substring(0, 8) + '...');
     if (!user) throw new Error('User not authenticated');
 
+    console.log('Building favorites query...');
     let query = supabase
       .from('favorites')
       .select(
@@ -110,11 +157,20 @@ export class FavoritesService {
       query = query.eq('collection_id', collectionId);
     }
 
+    console.log('Executing favorites query...');
     const { data, error } = await query.order('created_at', {
       ascending: false,
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Favorites query error:', error);
+      throw error;
+    }
+    console.log(
+      'Favorites query successful, got',
+      data?.length || 0,
+      'results'
+    );
     return data || [];
   }
 
@@ -216,6 +272,9 @@ export class FavoritesService {
     } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    // Ensure user profile exists
+    await this.ensureUserProfile(user);
+
     const { data, error } = await supabase
       .from('dislikes')
       .insert({
@@ -253,20 +312,29 @@ export class FavoritesService {
   }
 
   static async getDislikes(): Promise<Dislike[]> {
+    console.log('getDislikes called - checkConfig starting...');
     this.checkConfig();
+    console.log('checkConfig passed');
 
+    console.log('Getting user from supabase.auth...');
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    console.log('User retrieved:', !!user, user?.id?.substring(0, 8) + '...');
     if (!user) throw new Error('User not authenticated');
 
+    console.log('Executing dislikes query...');
     const { data, error } = await supabase
       .from('dislikes')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Dislikes query error:', error);
+      throw error;
+    }
+    console.log('Dislikes query successful, got', data?.length || 0, 'results');
     return data || [];
   }
 
