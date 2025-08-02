@@ -38,8 +38,16 @@ export const SwipePage: React.FC = () => {
   } = useFavorites();
 
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-25, 25]);
-  const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
+  const rotate = useTransform(x, [-300, 300], [-30, 30]);
+  const opacity = useTransform(
+    x,
+    [-300, -200, 0, 200, 300],
+    [0, 0.5, 1, 0.5, 0]
+  );
+
+  // Color overlays for swipe feedback
+  const likeOpacity = useTransform(x, [0, 150], [0, 1]);
+  const dislikeOpacity = useTransform(x, [-150, 0], [1, 0]);
 
   const loadNames = useCallback(async () => {
     setLoading(true);
@@ -130,30 +138,50 @@ export const SwipePage: React.FC = () => {
       const currentName = names[currentIndex];
 
       try {
+        // Animate the card out with spring animation
+        if (direction === 'right') {
+          x.set(400);
+        } else {
+          x.set(-400);
+        }
+
+        // Save to database
         if (direction === 'right') {
           await addFavorite(currentName.name, currentName.sex);
         } else {
           await addDislike(currentName.name, currentName.sex, 'Swiped left');
         }
+
+        // Wait for animation to complete, then show next card
+        setTimeout(() => {
+          setCurrentIndex((prev) => {
+            const newIndex = prev + 1;
+            console.log('Moving to next card:', newIndex, 'of', names.length);
+            return newIndex;
+          });
+          x.set(0);
+        }, 300);
       } catch (error) {
         console.error('Error updating name status:', error);
+        // Reset position on error
+        x.set(0);
       }
-
-      setCurrentIndex((prev) => prev + 1);
-      x.set(0); // Reset position for next card
     },
     [currentIndex, names, addFavorite, addDislike, x]
   );
 
   const handleDragEnd = (event: any, info: PanInfo) => {
     const threshold = 100;
+    const velocity = info.velocity.x;
 
-    if (info.offset.x > threshold) {
+    // Consider both offset and velocity for more responsive swiping
+    if (info.offset.x > threshold || velocity > 500) {
       handleSwipe('right');
-    } else if (info.offset.x < -threshold) {
+    } else if (info.offset.x < -threshold || velocity < -500) {
       handleSwipe('left');
     } else {
-      x.set(0); // Snap back to center
+      // Animate back to center with spring
+      x.set(0);
     }
   };
 
@@ -294,13 +322,37 @@ export const SwipePage: React.FC = () => {
 
               {/* Current Card */}
               <motion.div
+                key={currentIndex}
                 style={{ x, rotate, opacity }}
                 drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
+                dragConstraints={{ left: -300, right: 300 }}
+                dragElastic={0.2}
                 onDragEnd={handleDragEnd}
-                className="bg-white rounded-3xl shadow-2xl p-8 text-center cursor-grab active:cursor-grabbing"
+                className="bg-white rounded-3xl shadow-2xl p-8 text-center cursor-grab active:cursor-grabbing relative overflow-hidden"
                 whileTap={{ scale: 1.05 }}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 20,
+                }}
               >
+                {/* Like Overlay */}
+                <motion.div
+                  style={{ opacity: likeOpacity }}
+                  className="absolute inset-0 bg-green-500/20 flex items-center justify-center pointer-events-none"
+                >
+                  <HeartIcon className="h-20 w-20 text-green-500" />
+                </motion.div>
+
+                {/* Dislike Overlay */}
+                <motion.div
+                  style={{ opacity: dislikeOpacity }}
+                  className="absolute inset-0 bg-red-500/20 flex items-center justify-center pointer-events-none"
+                >
+                  <XMarkIcon className="h-20 w-20 text-red-500" />
+                </motion.div>
                 <div className="mb-6">
                   <h2 className="text-4xl font-bold text-gray-800 mb-2">
                     {currentName?.name}
