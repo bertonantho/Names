@@ -9,7 +9,6 @@ import {
   UsersIcon,
   FolderIcon,
   ShareIcon,
-  PencilIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import {
@@ -22,12 +21,6 @@ import { useCollections } from '../hooks/useCollections';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { isConfigured } from '../lib/supabase';
-import type {
-  Favorite,
-  Dislike,
-  Collection,
-  CollectionWithDetails,
-} from '../lib/supabase';
 
 type ViewMode = 'collections' | 'personal-favorites' | 'dislikes';
 
@@ -51,6 +44,7 @@ export const FavoritesPage: React.FC = () => {
     createCollection,
     selectCollection,
     inviteToCollection,
+    generateInvitationLink,
     refreshCollections,
   } = useCollections();
 
@@ -61,6 +55,8 @@ export const FavoritesPage: React.FC = () => {
   const [newCollectionName, setNewCollectionName] = useState('');
   const [newCollectionDescription, setNewCollectionDescription] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
+  const [invitationLink, setInvitationLink] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState(false);
 
   const handleRemoveFavorite = async (nameText: string, nameGender: string) => {
     const itemId = `${nameText}-${nameGender}`;
@@ -109,15 +105,33 @@ export const FavoritesPage: React.FC = () => {
     if (!selectedCollection || !inviteEmail.trim()) return;
 
     try {
-      await inviteToCollection(
+      const invitation = await inviteToCollection(
         selectedCollection.id,
         inviteEmail.trim(),
         'collaborator'
       );
+
+      // Check if we have an invitation token to generate a link
+      if (invitation.invitation_token) {
+        const link = generateInvitationLink(invitation.invitation_token);
+        setInvitationLink(link);
+        setInviteSuccess(true);
+      }
+
       setInviteEmail('');
-      setShowInviteModal(false);
+      // Don't close modal immediately - show success state
     } catch (error) {
       console.error('Failed to send invitation:', error);
+
+      // Check if error message contains invitation link
+      const errorMessage = error instanceof Error ? error.message : '';
+      if (errorMessage.includes('Please share the invitation link manually:')) {
+        const linkMatch = errorMessage.match(/https?:\/\/[^\s]+/);
+        if (linkMatch) {
+          setInvitationLink(linkMatch[0]);
+          setInviteSuccess(true);
+        }
+      }
     }
   };
 
@@ -733,36 +747,109 @@ export const FavoritesPage: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Invite to "{selectedCollection.name}"
             </h3>
-            <form onSubmit={handleInviteToCollection} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="partner@example.com"
-                  required
-                />
+
+            {!inviteSuccess ? (
+              <form onSubmit={handleInviteToCollection} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="partner@example.com"
+                    required
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowInviteModal(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    Send Invite
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg
+                      className="w-6 h-6 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">
+                    Invitation Created!
+                  </h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    An invitation has been created for this collection. Share
+                    the link below with your collaborator:
+                  </p>
+                </div>
+
+                {invitationLink && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Invitation Link
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={invitationLink}
+                        readOnly
+                        className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm"
+                      />
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(invitationLink);
+                          // Could add a toast notification here
+                        }}
+                        className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      This link will expire in 7 days. Share it with your
+                      collaborator to join the collection.
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowInviteModal(false);
+                      setInviteSuccess(false);
+                      setInvitationLink(null);
+                    }}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Done
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowInviteModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  Send Invite
-                </button>
-              </div>
-            </form>
+            )}
           </div>
         </div>
       )}

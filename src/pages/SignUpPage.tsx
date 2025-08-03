@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { isConfigured } from '../lib/supabase';
@@ -12,6 +12,12 @@ export const SignUpPage: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const { signUp } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Get the intended destination from URL params
+  const searchParams = new URLSearchParams(location.search);
+  const redirectPath = searchParams.get('redirect');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +127,11 @@ export const SignUpPage: React.FC = () => {
               click the link to activate your account.
             </p>
             <Link
-              to="/login"
+              to={
+                redirectPath
+                  ? `/login?redirect=${encodeURIComponent(redirectPath)}`
+                  : '/login'
+              }
               className="mt-4 inline-block font-medium text-primary hover:text-primary-hover"
             >
               Back to sign in

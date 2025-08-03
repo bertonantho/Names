@@ -7,6 +7,7 @@ import {
   ArrowTrendingUpIcon,
   CalendarIcon,
   UserGroupIcon,
+  HandThumbUpIcon,
 } from '@heroicons/react/24/outline';
 import {
   getSummary,
@@ -142,18 +143,21 @@ export const HomePage: React.FC = () => {
             </p>
           </Link>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <ArrowTrendingUpIcon className="w-6 h-6 text-green-600" />
+          <Link
+            to="/swipe"
+            className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow group"
+          >
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-200 transition-colors">
+              <HandThumbUpIcon className="w-6 h-6 text-green-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Popularity Trends
+              Discover Names
             </h3>
             <p className="text-gray-600">
-              See how names have evolved over time with detailed popularity
-              charts and statistics.
+              Swipe through names like a dating app! Like or dislike names to
+              build your preferences and find favorites.
             </p>
-          </div>
+          </Link>
 
           <Link
             to="/favorites"

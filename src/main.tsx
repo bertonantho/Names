@@ -15,6 +15,7 @@ import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { SwipePage } from './pages/SwipePage';
+import { InvitationPage } from './pages/InvitationPage';
 import './index.css';
 
 function App() {
@@ -85,6 +86,14 @@ function App() {
           element={
             <Layout>
               <ResetPasswordPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/collections/invite/:token"
+          element={
+            <Layout>
+              <InvitationPage />
             </Layout>
           }
         />

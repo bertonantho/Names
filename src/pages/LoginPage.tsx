@@ -13,8 +13,10 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get the intended destination from location state
-  const from = location.state?.from?.pathname || '/';
+  // Get the intended destination from location state or URL params
+  const searchParams = new URLSearchParams(location.search);
+  const redirectPath = searchParams.get('redirect');
+  const from = location.state?.from?.pathname || redirectPath || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

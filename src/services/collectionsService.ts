@@ -260,7 +260,7 @@ export class CollectionsService {
     // Check if user is owner of the collection
     const { data: collection, error: collectionError } = await supabase
       .from('collections')
-      .select('created_by')
+      .select('created_by, name')
       .eq('id', data.collectionId)
       .single();
 
@@ -281,6 +281,20 @@ export class CollectionsService {
       throw new Error('User is already a member of this collection');
     }
 
+    // Check for existing pending invitation
+    const { data: existingInvitation } = await supabase
+      .from('collection_invitations')
+      .select('id')
+      .eq('collection_id', data.collectionId)
+      .eq('invited_email', data.email)
+      .is('accepted_at', null)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (existingInvitation) {
+      throw new Error('There is already a pending invitation for this email');
+    }
+
     // Create invitation
     const { data: invitation, error } = await supabase
       .from('collection_invitations')
@@ -290,11 +304,68 @@ export class CollectionsService {
         invited_by: user.id,
         role: data.role || 'collaborator',
       })
-      .select()
+      .select(
+        `
+        *,
+        collection:collections(name),
+        inviter:profiles!collection_invitations_invited_by_fkey(full_name, email)
+      `
+      )
       .single();
 
     if (error) throw error;
+
+    // Send invitation email
+    try {
+      await this.sendInvitationEmail(invitation, collection.name);
+    } catch (emailError) {
+      console.error('Failed to send invitation email:', emailError);
+      // Don't throw error here - invitation is created, email failure shouldn't break the flow
+    }
+
     return invitation;
+  }
+
+  // Send invitation email using Supabase Auth
+  private static async sendInvitationEmail(
+    invitation: any,
+    collectionName: string
+  ): Promise<void> {
+    // Get inviter information
+    const inviterName =
+      invitation.inviter?.full_name || invitation.inviter?.email || 'Someone';
+
+    const invitationLink = this.generateInvitationLink(
+      invitation.invitation_token
+    );
+
+    // Use Supabase Auth to send the email
+    const { error } = await supabase.auth.admin.generateLink({
+      type: 'invite',
+      email: invitation.invited_email,
+      options: {
+        data: {
+          invitation_token: invitation.invitation_token,
+          collection_name: collectionName,
+          inviter_name: inviterName,
+        },
+        redirectTo: invitationLink,
+      },
+    });
+
+    if (error) {
+      // If admin API is not available, fall back to manual sharing
+      console.warn(
+        'Admin API not available, falling back to manual email handling'
+      );
+
+      // For development/production without admin access,
+      // the invitation link can be shared manually or through other means
+      throw new Error(
+        'Email sending requires admin privileges. Please share the invitation link manually: ' +
+          invitationLink
+      );
+    }
   }
 
   static async acceptInvitation(
