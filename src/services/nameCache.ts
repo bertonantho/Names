@@ -4,6 +4,7 @@ interface CacheEntry {
   data: NameData[];
   timestamp: number;
   filters: string;
+  excludedCount: number; // Track how many names were excluded when this cache was created
 }
 
 interface ChunkCache {
@@ -73,10 +74,26 @@ class NameCacheService {
   ): Promise<NameData[]> {
     const cacheKey = this.getCacheKey(filters);
 
-    // Check cache first
+    // Check cache first - but invalidate if we have more excluded names or cache is stale
     const cached = this.cache.get(cacheKey);
     if (cached && this.isValidCache(cached)) {
-      return this.filterExcluded(cached.data, excludedNames);
+      const currentExcludedCount = excludedNames.size;
+      const cachedExcludedCount = cached.excludedCount;
+
+      // More aggressive cache invalidation - any increase in exclusions should refresh
+      // Also check if we have enough names after filtering
+      const filteredNames = this.filterExcluded(cached.data, excludedNames);
+      if (
+        currentExcludedCount > cachedExcludedCount ||
+        filteredNames.length < targetCount * 0.3
+      ) {
+        console.log(
+          `Cache invalidated: excluded count ${cachedExcludedCount} -> ${currentExcludedCount}, filtered names: ${filteredNames.length}`
+        );
+        this.cache.delete(cacheKey);
+      } else {
+        return filteredNames;
+      }
     }
 
     const allNames: NameData[] = [];
@@ -97,9 +114,22 @@ class NameCacheService {
           const letterMatch =
             letterCount >= filters.minLetters &&
             letterCount <= filters.maxLetters;
+
+          // More lenient recent usage check - include names from last 5 years
           const hasRecentUsage =
             (name.yearlyData['2024'] || 0) > 0 ||
-            (name.yearlyData['2023'] || 0) > 0;
+            (name.yearlyData['2023'] || 0) > 0 ||
+            (name.yearlyData['2022'] || 0) > 0 ||
+            (name.yearlyData['2021'] || 0) > 0 ||
+            (name.yearlyData['2020'] || 0) > 0;
+
+          // Debug logging for troublesome cases
+          if (letterMatch && !hasRecentUsage && letterCount <= 6) {
+            console.log(
+              `Excluded ${name.name} (${letterCount} letters) - no recent usage`
+            );
+          }
+
           return letterMatch && hasRecentUsage;
         });
 
@@ -111,13 +141,23 @@ class NameCacheService {
       }
     }
 
+    // Add debug logging for filter results
+    console.log(
+      `Filter applied - minLetters: ${filters.minLetters}, maxLetters: ${filters.maxLetters}, found ${allNames.length} names`
+    );
+
     // Shuffle and cache
     const shuffledNames = allNames.sort(() => Math.random() - 0.5);
 
-    // Cache the result
-    this.setCachedNames(cacheKey, shuffledNames);
+    // Cache the result with current excluded count
+    this.setCachedNames(cacheKey, shuffledNames, excludedNames.size);
 
-    return this.filterExcluded(shuffledNames, excludedNames);
+    const finalFiltered = this.filterExcluded(shuffledNames, excludedNames);
+    console.log(
+      `After excluding selected names: ${finalFiltered.length} names remaining`
+    );
+
+    return finalFiltered;
   }
 
   // Filter out excluded names
@@ -133,7 +173,11 @@ class NameCacheService {
   }
 
   // Cache filtered names
-  private setCachedNames(key: string, names: NameData[]): void {
+  private setCachedNames(
+    key: string,
+    names: NameData[],
+    excludedCount: number = 0
+  ): void {
     // Clean old cache entries if we're at the limit
     if (this.cache.size >= this.MAX_CACHE_SIZE) {
       const oldestKey = this.cache.keys().next().value;
@@ -146,19 +190,31 @@ class NameCacheService {
       data: names,
       timestamp: Date.now(),
       filters: key,
+      excludedCount,
     });
   }
 
-  // Get cached names if available
-  getCachedNames(filters: {
-    gender: 'M' | 'F' | 'all';
-    minLetters: number;
-    maxLetters: number;
-  }): NameData[] | null {
+  // Get cached names if available - now includes excluded count check
+  getCachedNames(
+    filters: {
+      gender: 'M' | 'F' | 'all';
+      minLetters: number;
+      maxLetters: number;
+    },
+    excludedNames?: Set<string>
+  ): NameData[] | null {
     const cacheKey = this.getCacheKey(filters);
     const cached = this.cache.get(cacheKey);
 
     if (cached && this.isValidCache(cached)) {
+      // If excluded names provided, check if cache is still relevant
+      if (excludedNames && excludedNames.size > cached.excludedCount) {
+        console.log(
+          `Cache outdated: excluded count ${cached.excludedCount} -> ${excludedNames.size}`
+        );
+        this.cache.delete(cacheKey);
+        return null;
+      }
       return cached.data;
     }
 

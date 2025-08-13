@@ -62,16 +62,25 @@ export const SwipePage: React.FC = () => {
       // Create excluded names set from current favorites and dislikes
       const excludedNames = nameCache.createExcludedSet(favorites, dislikes);
 
-      // Check cache first
-      const cachedNames = nameCache.getCachedNames(filters);
+      // Check cache first - pass excluded names for better cache validation
+      const cachedNames = nameCache.getCachedNames(filters, excludedNames);
       if (cachedNames) {
         const filteredNames = cachedNames.filter(
           (name) => !excludedNames.has(`${name.name}-${name.sex}`)
         );
 
-        setNames(filteredNames);
-        setCurrentIndex(0);
-        return;
+        // Use a lower threshold and consider target count
+        if (filteredNames.length >= 30) {
+          setNames(filteredNames);
+          setCurrentIndex(0);
+          return;
+        } else {
+          console.log(
+            'Not enough cached names after filtering, reloading...',
+            filteredNames.length
+          );
+          nameCache.clearCache();
+        }
       }
 
       // Load names progressively with caching
@@ -92,7 +101,7 @@ export const SwipePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters, favorites, dislikes, isFavorited, isDisliked]);
+  }, [filters, favorites, dislikes]);
 
   // Load more names when running low
   const loadMoreNames = useCallback(async () => {
@@ -107,13 +116,19 @@ export const SwipePage: React.FC = () => {
         100 // Load 100 more names
       );
 
-      // Filter out names we already have
+      // Filter out names we already have and ensure no duplicates
       const existingNameSet = new Set(names.map((n) => `${n.name}-${n.sex}`));
       const newNames = additionalNames.filter(
         (name) => !existingNameSet.has(`${name.name}-${name.sex}`)
       );
 
-      setNames((prev) => [...prev, ...newNames]);
+      if (newNames.length > 0) {
+        setNames((prev) => [...prev, ...newNames]);
+        console.log(`Added ${newNames.length} new names to list`);
+      } else {
+        console.log('No new names to add - clearing cache to get fresh data');
+        nameCache.clearCache();
+      }
     } catch (error) {
       console.error('Error loading more names:', error);
     } finally {
@@ -131,6 +146,38 @@ export const SwipePage: React.FC = () => {
       loadMoreNames();
     }
   }, [currentIndex, names.length, loadMoreNames]);
+
+  // Auto-refresh names when we have new selections (more responsive)
+  useEffect(() => {
+    const totalSelections = favorites.length + dislikes.length;
+    const lastRefreshSelections = parseInt(
+      sessionStorage.getItem('lastRefreshSelections') || '0'
+    );
+    const selectionsSinceRefresh = totalSelections - lastRefreshSelections;
+
+    // Refresh more frequently (every 10 selections) and when we're running low on names
+    const shouldRefresh =
+      (selectionsSinceRefresh >= 10 ||
+        (selectionsSinceRefresh >= 5 && currentIndex >= names.length - 10)) &&
+      totalSelections > 0;
+
+    if (shouldRefresh) {
+      console.log(
+        `Refreshing names: ${selectionsSinceRefresh} new selections, index ${currentIndex}/${names.length}`
+      );
+      sessionStorage.setItem(
+        'lastRefreshSelections',
+        totalSelections.toString()
+      );
+      loadNames();
+    }
+  }, [
+    favorites.length,
+    dislikes.length,
+    loadNames,
+    names.length,
+    currentIndex,
+  ]);
 
   const handleSwipe = useCallback(
     async (direction: 'left' | 'right') => {
@@ -182,7 +229,7 @@ export const SwipePage: React.FC = () => {
     [currentIndex, names, addFavorite, addDislike, x, y]
   );
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (_event: any, info: PanInfo) => {
     const threshold = 75; // Lower threshold for easier swiping
     const velocityThreshold = 300; // Lower velocity threshold
     const offset = info.offset.x;
