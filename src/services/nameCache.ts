@@ -123,13 +123,6 @@ class NameCacheService {
             (name.yearlyData['2021'] || 0) > 0 ||
             (name.yearlyData['2020'] || 0) > 0;
 
-          // Debug logging for troublesome cases
-          if (letterMatch && !hasRecentUsage && letterCount <= 6) {
-            console.log(
-              `Excluded ${name.name} (${letterCount} letters) - no recent usage`
-            );
-          }
-
           return letterMatch && hasRecentUsage;
         });
 
@@ -141,23 +134,13 @@ class NameCacheService {
       }
     }
 
-    // Add debug logging for filter results
-    console.log(
-      `Filter applied - minLetters: ${filters.minLetters}, maxLetters: ${filters.maxLetters}, found ${allNames.length} names`
-    );
-
     // Shuffle and cache
     const shuffledNames = allNames.sort(() => Math.random() - 0.5);
 
     // Cache the result with current excluded count
     this.setCachedNames(cacheKey, shuffledNames, excludedNames.size);
 
-    const finalFiltered = this.filterExcluded(shuffledNames, excludedNames);
-    console.log(
-      `After excluding selected names: ${finalFiltered.length} names remaining`
-    );
-
-    return finalFiltered;
+    return this.filterExcluded(shuffledNames, excludedNames);
   }
 
   // Filter out excluded names
@@ -208,12 +191,16 @@ class NameCacheService {
 
     if (cached && this.isValidCache(cached)) {
       // If excluded names provided, check if cache is still relevant
-      if (excludedNames && excludedNames.size > cached.excludedCount) {
-        console.log(
-          `Cache outdated: excluded count ${cached.excludedCount} -> ${excludedNames.size}`
-        );
-        this.cache.delete(cacheKey);
-        return null;
+      if (excludedNames) {
+        const excludedGrowth = excludedNames.size - cached.excludedCount;
+        if (excludedGrowth >= 25) {
+          // Only invalidate after significant growth
+          console.log(
+            `Cache outdated: excluded count ${cached.excludedCount} -> ${excludedNames.size} (+${excludedGrowth})`
+          );
+          this.cache.delete(cacheKey);
+          return null;
+        }
       }
       return cached.data;
     }

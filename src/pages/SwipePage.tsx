@@ -194,26 +194,18 @@ export const SwipePage: React.FC = () => {
 
         // Animate card out smoothly
         const exitX = direction === 'right' ? 500 : -500;
-        const exitY = (Math.random() - 0.5) * 200; // Random slight rotation
 
-        // Use animate for smooth transition
-        const animateOut = async () => {
-          x.set(exitX);
-          y.set(exitY);
-          // Wait for the animation to complete
-          await new Promise((resolve) => setTimeout(resolve, 200));
-        };
+        // Smooth exit animation
+        await animate(x, exitX, { duration: 0.3, ease: 'easeOut' });
 
-        await animateOut();
-
-        // Move to next card
+        // Move to next card immediately after animation
         setCurrentIndex((prev) => {
           const newIndex = prev + 1;
           console.log('Moving to next card:', newIndex, 'of', names.length);
           return newIndex;
         });
 
-        // Reset position for next card (immediate, will be overridden by key change)
+        // Reset position for next card
         x.set(0);
         y.set(0);
 
@@ -391,9 +383,12 @@ export const SwipePage: React.FC = () => {
         <div className="relative w-full max-w-sm">
           {hasNextName ? (
             <>
-              {/* Next Card (background) */}
+              {/* Background Cards (simple stack effect) */}
+              {names[currentIndex + 2] && (
+                <div className="absolute inset-0 bg-white rounded-3xl shadow-lg transform scale-90 opacity-30 translate-y-2" />
+              )}
               {names[currentIndex + 1] && (
-                <div className="absolute inset-0 bg-white rounded-3xl shadow-xl transform scale-95 opacity-50" />
+                <div className="absolute inset-0 bg-white rounded-3xl shadow-xl transform scale-95 opacity-60 translate-y-1" />
               )}
 
               {/* Current Card */}
@@ -410,18 +405,9 @@ export const SwipePage: React.FC = () => {
                 dragElastic={0.1}
                 dragMomentum={false}
                 onDragEnd={handleDragEnd}
-                className="bg-white rounded-3xl shadow-2xl p-8 text-center cursor-grab active:cursor-grabbing relative overflow-hidden select-none"
+                className="bg-white rounded-3xl shadow-2xl p-8 text-center cursor-grab active:cursor-grabbing relative overflow-hidden select-none z-10"
                 whileTap={{ scale: 1.02 }}
                 whileDrag={{ scale: 1.05, zIndex: 50 }}
-                initial={{ scale: 0.9, opacity: 0, y: 50 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 25,
-                  mass: 0.8,
-                }}
               >
                 {/* Like Overlay */}
                 <motion.div
