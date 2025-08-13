@@ -142,7 +142,7 @@ export const SwipePage: React.FC = () => {
 
   // Auto-load more names when getting close to the end
   useEffect(() => {
-    if (currentIndex >= names.length - 20) {
+    if (currentIndex >= names.length - 1) {
       loadMoreNames();
     }
   }, [currentIndex, names.length, loadMoreNames]);

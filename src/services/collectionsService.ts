@@ -269,16 +269,25 @@ export class CollectionsService {
       throw new Error('Only collection owners can invite members');
     }
 
-    // Check if user is already a member
-    const { data: existingMember } = await supabase
-      .from('collection_members')
+    // Check if invited email corresponds to an existing user who is already a member
+    const { data: invitedUser } = await supabase
+      .from('profiles')
       .select('id')
-      .eq('collection_id', data.collectionId)
-      .eq('user_id', user.id)
+      .eq('email', data.email)
       .single();
 
-    if (existingMember) {
-      throw new Error('User is already a member of this collection');
+    if (invitedUser) {
+      // Check if this user is already a member
+      const { data: existingMember } = await supabase
+        .from('collection_members')
+        .select('id')
+        .eq('collection_id', data.collectionId)
+        .eq('user_id', invitedUser.id)
+        .single();
+
+      if (existingMember) {
+        throw new Error('User is already a member of this collection');
+      }
     }
 
     // Check for existing pending invitation
