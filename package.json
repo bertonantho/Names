@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run split-data && tsc && vite build",
+    "build": "npm run split-data && npm run split-departments && tsc && vite build",
     "dev": "vite",
     "serve": "vite preview",
     "format": "prettier --write .",
@@ -11,7 +11,8 @@
     "prepare": "husky",
     "split-data": "node scripts/split-json-data.cjs",
     "process-csv": "node scripts/process-csv-data.cjs",
-    "process-departments": "node scripts/process-department-data.cjs"
+    "process-departments": "node scripts/process-department-data.cjs",
+    "split-departments": "node scripts/split-department-data.cjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.4",

@@ -18,6 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Data Processing
 
 - `npm run split-data` - Split JSON data files into chunks for Vercel deployment
+- `npm run split-departments` - Split department data into individual files for Vercel compatibility
 - `npm run process-csv` - Convert CSV data files to JSON format
 
 ### Database Setup
@@ -96,10 +97,17 @@ The application gracefully handles missing Supabase configuration for developmen
 ### Build Process
 
 1. `npm run split-data` - Processes JSON data into deployment-optimized chunks
-2. `tsc` - TypeScript compilation and type checking
-3. `vite build` - Production build with code splitting and optimization
+2. `npm run split-departments` - Splits large department data for Vercel file size limits
+3. `tsc` - TypeScript compilation and type checking
+4. `vite build` - Production build with code splitting and optimization
 
 The build process is optimized for Vercel deployment with SPA routing configuration.
+
+**Vercel Deployment Notes**:
+
+- Department data is automatically split to respect Vercel's 25MB file size limit
+- FranceMap component uses fallback loading strategy (split files → single file)
+- Static files are served from `/public/data/` directory
 
 ### Code Quality Setup
 

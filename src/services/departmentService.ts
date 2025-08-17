@@ -3,24 +3,68 @@ export interface DepartmentBirthData {
   [departmentCode: string]: number;
 }
 
-// Cache for department data
-let departmentDataCache: any = null;
+// Cache for individual name data
+const nameDataCache = new Map<string, any>();
 
-// Load department data from JSON file
-async function loadDepartmentData(): Promise<any> {
-  if (departmentDataCache) {
-    return departmentDataCache;
+// Cache for manifest data
+let manifestCache: any = null;
+
+// Load department manifest to check data availability
+async function loadManifest(): Promise<any> {
+  if (manifestCache) {
+    return manifestCache;
   }
 
   try {
+    const response = await fetch('/data/department_manifest.json');
+    if (!response.ok) {
+      throw new Error('Manifest not found');
+    }
+    manifestCache = await response.json();
+    return manifestCache;
+  } catch (error) {
+    console.warn(
+      'Department manifest not available, falling back to single file:',
+      error
+    );
+    return null;
+  }
+}
+
+// Load department data for a specific name
+async function loadNameDepartmentData(name: string): Promise<any> {
+  const normalizedName = normalizeName(name);
+  const cacheKey = normalizedName;
+
+  if (nameDataCache.has(cacheKey)) {
+    return nameDataCache.get(cacheKey);
+  }
+
+  try {
+    // Try to load from split data first
+    const manifest = await loadManifest();
+    if (manifest && manifest.type === 'split_by_name') {
+      const filename = `${normalizedName.toLowerCase().replace(/[^a-z0-9]/g, '_')}.json`;
+      const response = await fetch(`/data/departments/${filename}`);
+      if (response.ok) {
+        const data = await response.json();
+        nameDataCache.set(cacheKey, data);
+        return data;
+      }
+    }
+
+    // Fallback to original single file approach
     const response = await fetch('/data/department_data.json');
     if (!response.ok) {
       throw new Error('Failed to fetch department data');
     }
-    departmentDataCache = await response.json();
-    return departmentDataCache;
+    const fullData = await response.json();
+    const nameData = fullData[normalizedName] || null;
+    nameDataCache.set(cacheKey, nameData);
+    return nameData;
   } catch (error) {
-    console.warn('Department data not available:', error);
+    console.warn('Department data not available for', name, ':', error);
+    nameDataCache.set(cacheKey, null);
     return null;
   }
 }
@@ -37,21 +81,16 @@ export async function getDepartmentData(
   year: number
 ): Promise<DepartmentBirthData> {
   try {
-    const departmentData = await loadDepartmentData();
-    if (!departmentData) {
+    const nameData = await loadNameDepartmentData(name);
+    if (!nameData) {
       return {};
     }
 
-    const normalizedName = normalizeName(name);
     const yearStr = year.toString();
 
-    // Check if we have data for this name/sex/year combination
-    if (
-      departmentData[normalizedName] &&
-      departmentData[normalizedName][sex] &&
-      departmentData[normalizedName][sex][yearStr]
-    ) {
-      return departmentData[normalizedName][sex][yearStr];
+    // Check if we have data for this sex/year combination
+    if (nameData[sex] && nameData[sex][yearStr]) {
+      return nameData[sex][yearStr];
     }
 
     return {};
@@ -67,16 +106,14 @@ export async function getAvailableYearsForName(
   sex: 'M' | 'F'
 ): Promise<number[]> {
   try {
-    const departmentData = await loadDepartmentData();
-    if (!departmentData) {
+    const nameData = await loadNameDepartmentData(name);
+    if (!nameData) {
       return [];
     }
 
-    const normalizedName = normalizeName(name);
-
-    // Check if we have data for this name/sex combination
-    if (departmentData[normalizedName] && departmentData[normalizedName][sex]) {
-      const years = Object.keys(departmentData[normalizedName][sex])
+    // Check if we have data for this sex combination
+    if (nameData[sex]) {
+      const years = Object.keys(nameData[sex])
         .map((year) => parseInt(year))
         .sort((a, b) => b - a); // Most recent first
 

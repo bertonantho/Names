@@ -11,4 +11,7 @@ data/
 # Exclude the large processed file but include the split files
 public/data/processed_names.json
 
+# Exclude large department data file (but include split files and manifest)
+public/data/department_data.json
+
 .vercel
