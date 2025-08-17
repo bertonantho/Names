@@ -4,7 +4,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   UserIcon,
-  ArrowRightOnRectangleIcon,
+  ArrowRightStartOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 
@@ -102,6 +102,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     Favorites
                   </Link>
                   <Link
+                    to="/couples"
+                    className="text-gray-700 hover:text-primary font-medium transition-colors"
+                  >
+                    Couples
+                  </Link>
+                  <Link
                     to="/profile"
                     className="text-gray-700 hover:text-primary font-medium transition-colors"
                   >
@@ -126,7 +132,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                           onClick={handleSignOut}
                           className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors"
                         >
-                          <ArrowRightOnRectangleIcon className="w-4 h-4" />
+                          <ArrowRightStartOnRectangleIcon className="w-4 h-4" />
                           <span className="text-sm">Sign Out</span>
                         </button>
                       </div>
@@ -223,6 +229,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   ❤️ Favorites
                 </Link>
                 <Link
+                  to="/couples"
+                  className="block py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-primary font-medium transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  👫 Couples
+                </Link>
+                <Link
                   to="/profile"
                   className="block py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-primary font-medium transition-colors"
                   onClick={closeMobileMenu}
@@ -244,7 +257,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                       onClick={handleSignOut}
                       className="flex items-center space-x-2 w-full py-3 px-4 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                     >
-                      <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                      <ArrowRightStartOnRectangleIcon className="w-5 h-5" />
                       <span>Sign Out</span>
                     </button>
                   </div>

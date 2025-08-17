@@ -126,11 +126,17 @@ ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE dislikes ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can view basic profile info for couples comparison" ON profiles;
 DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
 -- Profiles policies
 CREATE POLICY "Users can view their own profile" ON profiles
     FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can view basic profile info for couples comparison" ON profiles
+    FOR SELECT USING (
+        auth.uid() IS NOT NULL
+    );
 
 CREATE POLICY "Users can update their own profile" ON profiles
     FOR UPDATE USING (auth.uid() = id);

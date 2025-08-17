@@ -16,6 +16,7 @@ import { SignUpPage } from './pages/SignUpPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { SwipePage } from './pages/SwipePage';
 import { InvitationPage } from './pages/InvitationPage';
+import { CouplesComparisonPage } from './pages/CouplesComparisonPage';
 import './index.css';
 
 function App() {
@@ -126,6 +127,14 @@ function App() {
               <ProtectedRoute>
                 <ProfilePage />
               </ProtectedRoute>
+            </Layout>
+          }
+        />
+        <Route
+          path="/couples"
+          element={
+            <Layout>
+              <CouplesComparisonPage />
             </Layout>
           }
         />
