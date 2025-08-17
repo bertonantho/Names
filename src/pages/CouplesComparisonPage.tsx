@@ -24,8 +24,7 @@ import { isConfigured } from '../lib/supabase';
 
 export const CouplesComparisonPage: React.FC = () => {
   const { user } = useAuth();
-  const [leftPartnerEmail, setLeftPartnerEmail] = useState('');
-  const [rightPartnerEmail, setRightPartnerEmail] = useState('');
+  const [partnerEmail, setPartnerEmail] = useState('');
   const [comparisonData, setComparisonData] =
     useState<CoupleComparisonData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -35,13 +34,18 @@ export const CouplesComparisonPage: React.FC = () => {
   const handleCompareCouple = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!leftPartnerEmail.trim() || !rightPartnerEmail.trim()) {
-      setError('Please enter both partner emails');
+    if (!partnerEmail.trim()) {
+      setError("Please enter your partner's email");
       return;
     }
 
-    if (leftPartnerEmail.trim() === rightPartnerEmail.trim()) {
-      setError('Please enter different email addresses for each partner');
+    if (!user?.email) {
+      setError('Unable to get your email. Please try signing in again.');
+      return;
+    }
+
+    if (partnerEmail.trim().toLowerCase() === user.email.toLowerCase()) {
+      setError("Please enter your partner's email, not your own");
       return;
     }
 
@@ -49,25 +53,21 @@ export const CouplesComparisonPage: React.FC = () => {
     setError(null);
 
     try {
-      // Validate both emails exist
+      // Validate partner email exists
       setValidatingEmails(true);
-      const [leftValid, rightValid] = await Promise.all([
-        CouplesService.validatePartnerEmail(leftPartnerEmail.trim()),
-        CouplesService.validatePartnerEmail(rightPartnerEmail.trim()),
-      ]);
+      const partnerValid = await CouplesService.validatePartnerEmail(
+        partnerEmail.trim()
+      );
       setValidatingEmails(false);
 
-      if (!leftValid) {
-        throw new Error(`No account found for ${leftPartnerEmail}`);
-      }
-      if (!rightValid) {
-        throw new Error(`No account found for ${rightPartnerEmail}`);
+      if (!partnerValid) {
+        throw new Error(`No account found for ${partnerEmail}`);
       }
 
-      // Get comparison data
+      // Get comparison data (current user as left, partner as right)
       const data = await CouplesService.compareCouplePreferences(
-        leftPartnerEmail.trim(),
-        rightPartnerEmail.trim()
+        user.email,
+        partnerEmail.trim()
       );
 
       setComparisonData(data);
@@ -83,8 +83,7 @@ export const CouplesComparisonPage: React.FC = () => {
   const resetComparison = () => {
     setComparisonData(null);
     setError(null);
-    setLeftPartnerEmail('');
-    setRightPartnerEmail('');
+    setPartnerEmail('');
   };
 
   if (!isConfigured) {
@@ -175,40 +174,36 @@ export const CouplesComparisonPage: React.FC = () => {
                   Find Your Perfect Names Together
                 </h2>
                 <p className="text-gray-600 text-sm mt-2">
-                  Enter both partners' email addresses to compare name
-                  preferences
+                  Compare your name preferences with your partner
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Left Partner Email
+                    You
                   </label>
-                  <div className="relative">
-                    <EnvelopeIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <input
-                      type="email"
-                      value={leftPartnerEmail}
-                      onChange={(e) => setLeftPartnerEmail(e.target.value)}
-                      placeholder="partner1@example.com"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                      required
-                    />
+                  <div className="p-3 bg-gray-50 border border-gray-300 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <UserGroupIcon className="h-5 w-5 text-purple-600" />
+                      <span className="text-gray-900 font-medium">
+                        {user?.user_metadata?.full_name || user?.email}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Right Partner Email
+                    Your Partner's Email
                   </label>
                   <div className="relative">
                     <EnvelopeIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                     <input
                       type="email"
-                      value={rightPartnerEmail}
-                      onChange={(e) => setRightPartnerEmail(e.target.value)}
-                      placeholder="partner2@example.com"
+                      value={partnerEmail}
+                      onChange={(e) => setPartnerEmail(e.target.value)}
+                      placeholder="partner@example.com"
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                       required
                     />
@@ -268,8 +263,8 @@ export const CouplesComparisonPage: React.FC = () => {
                     Comparison Results
                   </h2>
                   <p className="text-gray-600">
-                    {comparisonData.leftPartnerEmail} vs{' '}
-                    {comparisonData.rightPartnerEmail}
+                    {comparisonData.leftPartnerName} vs{' '}
+                    {comparisonData.rightPartnerName}
                   </p>
                 </div>
                 <button
@@ -302,7 +297,7 @@ export const CouplesComparisonPage: React.FC = () => {
                     <div className="text-2xl font-bold text-blue-700">
                       {comparisonData.leftOnlyLikes.length}
                     </div>
-                    <div className="text-sm text-blue-600">Left Only</div>
+                    <div className="text-sm text-blue-600">Your Only</div>
                   </div>
                 </div>
               </div>
@@ -314,7 +309,7 @@ export const CouplesComparisonPage: React.FC = () => {
                     <div className="text-2xl font-bold text-purple-700">
                       {comparisonData.rightOnlyLikes.length}
                     </div>
-                    <div className="text-sm text-purple-600">Right Only</div>
+                    <div className="text-sm text-purple-600">Partner Only</div>
                   </div>
                 </div>
               </div>
@@ -408,7 +403,7 @@ export const CouplesComparisonPage: React.FC = () => {
                           ) : (
                             <HandThumbDownIconSolid className="h-5 w-5 text-red-600" />
                           )}
-                          <span className="text-sm text-gray-600">Left</span>
+                          <span className="text-sm text-gray-600">You</span>
                         </div>
                         <div className="text-gray-400">vs</div>
                         <div className="flex items-center gap-2">
@@ -417,7 +412,7 @@ export const CouplesComparisonPage: React.FC = () => {
                           ) : (
                             <HandThumbDownIconSolid className="h-5 w-5 text-red-600" />
                           )}
-                          <span className="text-sm text-gray-600">Right</span>
+                          <span className="text-sm text-gray-600">Partner</span>
                         </div>
                       </div>
                     </div>
@@ -432,7 +427,7 @@ export const CouplesComparisonPage: React.FC = () => {
               {comparisonData.leftOnlyLikes.length > 0 && (
                 <div className="bg-white rounded-xl shadow-sm p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    {comparisonData.leftPartnerEmail} Only (
+                    {comparisonData.leftPartnerName} Only (
                     {comparisonData.leftOnlyLikes.length})
                   </h3>
                   <div className="space-y-2">
@@ -471,7 +466,7 @@ export const CouplesComparisonPage: React.FC = () => {
               {comparisonData.rightOnlyLikes.length > 0 && (
                 <div className="bg-white rounded-xl shadow-sm p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    {comparisonData.rightPartnerEmail} Only (
+                    {comparisonData.rightPartnerName} Only (
                     {comparisonData.rightOnlyLikes.length})
                   </h3>
                   <div className="space-y-2">

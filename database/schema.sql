@@ -221,6 +221,7 @@ CREATE POLICY "Users can update invitations for their collections" ON collection
 DROP POLICY IF EXISTS "Users can view favorites they have access to" ON favorites;
 DROP POLICY IF EXISTS "Users can view their own favorites" ON favorites;
 DROP POLICY IF EXISTS "Users can view favorites in collections they have access to" ON favorites;
+DROP POLICY IF EXISTS "Users can view personal favorites for couples comparison" ON favorites;
 DROP POLICY IF EXISTS "Users can insert their own favorites" ON favorites;
 DROP POLICY IF EXISTS "Users can update their own favorites" ON favorites;
 DROP POLICY IF EXISTS "Users can delete their own favorites" ON favorites;
@@ -234,6 +235,11 @@ CREATE POLICY "Users can view favorites they have access to" ON favorites
         ))
     );
 
+CREATE POLICY "Users can view personal favorites for couples comparison" ON favorites
+    FOR SELECT USING (
+        auth.uid() IS NOT NULL AND collection_id IS NULL
+    );
+
 CREATE POLICY "Users can insert their own favorites" ON favorites
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 
@@ -245,12 +251,18 @@ CREATE POLICY "Users can delete their own favorites" ON favorites
 
 
 DROP POLICY IF EXISTS "Users can view their own dislikes" ON dislikes;
+DROP POLICY IF EXISTS "Users can view dislikes for couples comparison" ON dislikes;
 DROP POLICY IF EXISTS "Users can insert their own dislikes" ON dislikes;
 DROP POLICY IF EXISTS "Users can update their own dislikes" ON dislikes;
 DROP POLICY IF EXISTS "Users can delete their own dislikes" ON dislikes;
 -- Dislikes policies (unchanged)
 CREATE POLICY "Users can view their own dislikes" ON dislikes
     FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view dislikes for couples comparison" ON dislikes
+    FOR SELECT USING (
+        auth.uid() IS NOT NULL
+    );
 
 CREATE POLICY "Users can insert their own dislikes" ON dislikes
     FOR INSERT WITH CHECK (auth.uid() = user_id);

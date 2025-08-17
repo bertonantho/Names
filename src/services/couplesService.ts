@@ -19,6 +19,8 @@ export interface CoupleComparisonData {
   }>;
   leftPartnerEmail: string;
   rightPartnerEmail: string;
+  leftPartnerName: string;
+  rightPartnerName: string;
 }
 
 export class CouplesService {
@@ -131,6 +133,11 @@ export class CouplesService {
           this.getUserDislikes(rightPartner.id),
         ]);
 
+      console.log('Left partner favorites:', leftFavorites.length);
+      console.log('Right partner favorites:', rightFavorites.length);
+      console.log('Left partner dislikes:', leftDislikes.length);
+      console.log('Right partner dislikes:', rightDislikes.length);
+
       // Create maps for efficient lookup
       const leftFavoritesMap = new Map(
         leftFavorites.map((fav) => [`${fav.name_text}-${fav.name_gender}`, fav])
@@ -210,6 +217,8 @@ export class CouplesService {
         conflictingNames,
         leftPartnerEmail: leftPartner.email,
         rightPartnerEmail: rightPartner.email,
+        leftPartnerName: leftPartner.full_name || leftPartner.email,
+        rightPartnerName: rightPartner.full_name || rightPartner.email,
       };
     } catch (error) {
       console.error('Error comparing couple preferences:', error);

@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Run SQL from `database/schema.sql` in Supabase SQL editor to set up database schema
 - Database includes RLS policies, triggers, and sample data
-- **For Couples Comparison Feature**: Run `database/add_couples_policy.sql` to enable partner lookup functionality
+- **For Couples Comparison Feature**: Run `database/add_couples_policy.sql` to enable partner lookup and preference sharing functionality
 
 ## Architecture Overview
 
