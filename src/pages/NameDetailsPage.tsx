@@ -404,32 +404,13 @@ export const NameDetailsPage: React.FC = () => {
               />
             </div>
 
-            {/* Year Selector */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Year for Detailed View
-              </label>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                {Object.keys(data.yearlyData)
-                  .sort((a, b) => parseInt(b) - parseInt(a))
-                  .map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
             {/* Regional Map */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Regional Distribution in {selectedYear}
-              </h3>
-              <FranceMap nameData={data} selectedYear={selectedYear} />
+              <FranceMap
+                nameData={data}
+                selectedYear={selectedYear}
+                onYearChange={setSelectedYear}
+              />
             </div>
           </div>
         ))}
