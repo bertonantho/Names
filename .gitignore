@@ -14,4 +14,7 @@ public/data/processed_names.json
 # Exclude large department data file (but include split files and manifest)
 public/data/department_data.json
 
+# Include departments directory (override the data/ exclusion)
+!public/data/departments/*
+
 .vercel
